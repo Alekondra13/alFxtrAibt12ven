@@ -359,14 +359,19 @@
 
         <div class="key-status" id="keyStatus">
             <span class="key-status-dot"></span>
-            <span id="keyStatusText">Twelve Data ключ не установлен</span>
+            <span id="keyStatusText">Ключи не установлены</span>
         </div>
 
-        <label class="settings-label">Twelve Data API ключ</label>
-        <input type="text" id="twelveKeyInput" placeholder="Вставьте ваш бесплатный ключ">
+        <label class="settings-label">Twelve Data API Ключи (до 5 шт)</label>
+        <input type="text" id="twelveKeyInput1" placeholder="Ключ 1" style="margin-bottom: 6px;">
+        <input type="text" id="twelveKeyInput2" placeholder="Ключ 2 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="twelveKeyInput3" placeholder="Ключ 3 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="twelveKeyInput4" placeholder="Ключ 4 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="twelveKeyInput5" placeholder="Ключ 5 (резерв)" style="margin-bottom: 6px;">
+        
         <div class="settings-help">
-            Бесплатно: <a href="https://twelvedata.com/register" target="_blank">twelvedata.com/register</a><br>
-            Без ключа форекс работает на дневных данных ECB.
+            Если один ключ упрется в лимит, бот автоматически возьмет следующий.<br>
+            Бесплатно: <a href="https://twelvedata.com/register" target="_blank">twelvedata.com/register</a>
         </div>
 
         <label class="settings-label">Кредитное плечо (FxPro)</label>
@@ -486,23 +491,33 @@ function safeGet(k) { try { return localStorage.getItem(k); } catch(e) { return 
 function safeSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
 function safeDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
 
-function getTwelveKey() { return safeGet('twelve_api_key') || ''; }
+function getTwelveKeys() {
+    try {
+        const keys = JSON.parse(safeGet('twelve_api_keys') || '[]');
+        return keys.filter(k => k && k.trim().length > 5);
+    } catch(e) { return []; }
+}
 function getLeverage() { return 999999; } // Всегда 1:∞, зафиксировано
 
 function updateKeyStatus() {
+    const keys = getTwelveKeys();
     const dot = document.getElementById('apiDot');
-    if (dot) dot.style.display = getTwelveKey() ? 'none' : 'block';
+    if (dot) dot.style.display = keys.length > 0 ? 'none' : 'block';
     const status = document.getElementById('keyStatus');
     const text = document.getElementById('keyStatusText');
     if (status && text) {
-        if (getTwelveKey()) { status.classList.add('active'); text.textContent = 'Twelve Data ключ установлен'; }
-        else { status.classList.remove('active'); text.textContent = 'Twelve Data ключ не установлен'; }
+        if (keys.length > 0) { status.classList.add('active'); text.textContent = `Установлено ключей: ${keys.length}`; }
+        else { status.classList.remove('active'); text.textContent = 'Ключи не установлены'; }
     }
 }
 
 function openSettings() {
     try {
-        document.getElementById('twelveKeyInput').value = getTwelveKey();
+        const keys = getTwelveKeys();
+        for (let i = 1; i <= 5; i++) {
+            const el = document.getElementById('twelveKeyInput' + i);
+            if (el) el.value = keys[i-1] || '';
+        }
         updateKeyStatus();
         document.getElementById('settingsModal').classList.add('active');
     } catch(e) { alert('Ошибка: ' + e.message); }
@@ -510,13 +525,49 @@ function openSettings() {
 
 function saveSettings() {
     try {
-        const key = document.getElementById('twelveKeyInput').value.trim();
-        if (key) safeSet('twelve_api_key', key); else safeDel('twelve_api_key');
+        const keys = [];
+        for (let i = 1; i <= 5; i++) {
+            const val = document.getElementById('twelveKeyInput' + i).value.trim();
+            if (val) keys.push(val);
+        }
+        if (keys.length > 0) safeSet('twelve_api_keys', JSON.stringify(keys));
+        else safeDel('twelve_api_keys');
+        
         updateKeyStatus();
         closeModal('settingsModal');
         updateRisk();
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
+
+// === РОТАТОР КЛЮЧЕЙ ===
+let currentKeyIndex = 0;
+async function fetchTwelveData(endpoint, params) {
+    const keys = getTwelveKeys();
+    if (keys.length === 0) throw new Error('Нет API ключей');
+    
+    let lastError = null;
+    for (let i = 0; i < keys.length; i++) {
+        let idx = (currentKeyIndex + i) % keys.length;
+        let key = keys[idx];
+        let url = `https://api.twelvedata.com/${endpoint}?${params}&apikey=${key}`;
+        try {
+            let res = await fetch(url);
+            let data = await res.json();
+            if (data.status === 'error' || data.code === 429) {
+                console.warn(`Ключ ${idx+1} не сработал:`, data.message);
+                lastError = data.message || 'Limit reached';
+                continue; // Пробуем следующий ключ
+            }
+            currentKeyIndex = idx; // Запоминаем рабочий ключ
+            return data;
+        } catch(e) {
+            console.warn(`Ключ ${idx+1} ошибка сети`);
+            lastError = e.message;
+        }
+    }
+    throw new Error('Все ключи исчерпаны или неверны. ' + (lastError || ''));
+}
+// ======================
 
 function showScan() { document.getElementById('scanOverlay').classList.add('active'); updateScan(0, 'Инициализация...'); }
 function updateScan(p, t) {
@@ -697,7 +748,7 @@ async function loadTradingView() {
     const key = document.getElementById('pairSelect').value;
     const asset = ASSETS[key];
     let tvInterval = '15';
-    if (getTwelveKey() || asset.binance) {
+    if (getTwelveKeys().length > 0 || asset.binance) {
         try {
             const tf = await getBestTimeframe(asset);
             tvInterval = tf === '1h' ? '60' : tf === '4h' ? '240' : tf === '1d' ? 'D' : '15';
@@ -807,7 +858,7 @@ function isMarketOpen(asset) {
 }
 
 async function getBestTimeframe(asset) {
-    if (!asset.binance && !getTwelveKey()) return '1d';
+    if (!asset.binance && getTwelveKeys().length === 0) return '1d';
     const tfs = ['15min', '1h', '4h'];
     let bestTf = '15min', maxAdx = 0;
     for (const tf of tfs) {
@@ -820,12 +871,9 @@ async function getBestTimeframe(asset) {
                 const json = await res.json();
                 if (!Array.isArray(json) || json.length < 30) continue;
                 json.forEach(k => { highs.push(parseFloat(k[2])); lows.push(parseFloat(k[3])); closes.push(parseFloat(k[4])); });
-            } else if (asset.td && getTwelveKey()) {
-                const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(asset.td) + '&interval=' + tf + '&outputsize=50&apikey=' + getTwelveKey();
-                const res = await fetch(url);
-                if (!res.ok) continue;
-                const data = await res.json();
-                if (data.status === 'error' || !data.values || data.values.length < 30) continue;
+            } else if (asset.td) {
+                const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tf + '&outputsize=50');
+                if (!data.values || data.values.length < 30) continue;
                 data.values.forEach(v => { highs.push(parseFloat(v.high)); lows.push(parseFloat(v.low)); closes.push(parseFloat(v.close)); });
             } else continue;
             const adxData = calcADX(highs, lows, closes, 14);
@@ -848,15 +896,14 @@ async function fetchDataForAsset(asset) {
         });
         return r;
     }
-    if (asset.td && getTwelveKey()) {
+    if (asset.td && getTwelveKeys().length > 0) {
         const tf = await getBestTimeframe(asset);
         const tfMap = { '15m': '15min', '1h': '1h', '4h': '4h' };
         const tdTf = tfMap[tf] || '15min';
-        const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(asset.td) + '&interval=' + tdTf + '&outputsize=100&apikey=' + getTwelveKey();
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('API error');
-        const data = await res.json();
-        if (data.status === 'error' || !data.values || data.values.length < 30) throw new Error(data.message || 'Мало данных');
+        
+        const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tdTf + '&outputsize=100');
+        
+        if (!data.values || data.values.length < 30) throw new Error(data.message || 'Мало данных');
         const values = data.values.slice().reverse();
         const r = { opens: [], highs: [], lows: [], closes: [], volumes: [], tf: tf };
         values.forEach(v => {
@@ -925,7 +972,7 @@ async function analyzeMarket() {
         data = await fetchDataForAsset(asset);
     } catch(e) {
         hideScan();
-        alert('Ошибка данных: ' + e.message + '\n\nДля форекса добавьте Twelve Data ключ в настройках');
+        alert('Ошибка данных: ' + e.message + '\n\nДля форекса добавьте Twelve Data ключи в настройках');
         btn.disabled = false;
         btn.textContent = '⚡ ЗАПУСТИТЬ ИИ';
         return;
@@ -973,8 +1020,8 @@ async function analyzeMarket() {
     if (last < bb.lower && score < 0) { score += 1; reasons.push('⛔ Пробой нижней BB'); }
 
     if (adxData.adx > 25) {
-        if (adxData.plusDI > adxData.minusDI) { score += 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↑'); }
-        else { score -= 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↓'); }
+        if (adxData.plusDI > adxData.minusDI) { score += 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↑ (Бычий)'); }
+        else { score -= 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↓ (Медвежий)'); }
         if (adxData.adx > 40) { score += Math.sign(score) * 0.5; reasons.push('💪 Очень сильный тренд'); }
     } else if (adxData.adx < 20) {
         score *= 0.3;
@@ -1019,7 +1066,7 @@ async function analyzeMarket() {
     if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.7);
     if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.3);
 
-    // === РАСЧЕТ SL/TP В ДОЛЛАРАХ ===
+    // === ПРОВЕРКА РИСКА ПО СТОП-ЛОССУ ===
     let sltpHtml = '';
     if (dir !== 'WAIT') {
         const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
@@ -1029,16 +1076,26 @@ async function analyzeMarket() {
         const lot = calcAutoLot(key, bal, last);
         const pipVal = asset.pipValFn ? asset.pipValFn(last) : asset.pipVal;
         
-        const slDistancePips = Math.abs(last - slPrice) / asset.pip;
-        const tpDistancePips = Math.abs(tpPrice - last) / asset.pip;
+        const slDistance = Math.abs(last - slPrice);
+        const tpDistance = Math.abs(tpPrice - last);
         
-        const lossUsd = (slDistancePips * pipVal * lot).toFixed(2);
-        const profitUsd = (tpDistancePips * pipVal * lot).toFixed(2);
+        const slPips = slDistance / asset.pip;
+        const tpPips = tpDistance / asset.pip;
+        
+        const lossUsd = (slPips * pipVal * lot);
+        const profitUsd = (tpPips * pipVal * lot);
 
-        sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b><br>' +
-                   '<span class="sl">🛡 Стоп: -$' + lossUsd + '</span> | ' +
-                   '<span class="tp">💰 Тейк: +$' + profitUsd + '</span>';
+        if (lossUsd > bal) {
+            dir = 'WAIT';
+            reasons.unshift(`⛔ СТОП-ЛОСС (-$${lossUsd.toFixed(2)}) БОЛЬШЕ ВАШЕГО БАЛАНСА! Сделка отменена.`);
+            confidence = 0;
+        } else {
+            sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b><br>' +
+                       '<span class="sl">🛡 Стоп: -$' + lossUsd.toFixed(2) + '</span> | ' +
+                       '<span class="tp">💰 Тейк: +$' + profitUsd.toFixed(2) + '</span>';
+        }
     }
+    
     const timeMessage = (dir !== 'WAIT') ? '<br>⏱ Время сделки: <span class="conf">' + tradeMinutes + ' мин</span>' : '';
 
     updateScan(100, 'Готово!');
@@ -1064,8 +1121,8 @@ async function analyzeMarket() {
     if (news.hasNews) {
         document.getElementById('warningBox').innerHTML = news.message;
         document.getElementById('warningBox').style.display = 'block';
-    } else if (asset.type === 'forex' && !getTwelveKey()) {
-        document.getElementById('warningBox').innerHTML = '⚠️ Форекс без Twelve Data ключа: используются дневные данные. Для точных сигналов добавьте ключ в настройках';
+    } else if (asset.type === 'forex' && getTwelveKeys().length === 0) {
+        document.getElementById('warningBox').innerHTML = '⚠️ Форекс без Twelve Data ключа: используются дневные данные. Добавьте ключи в настройках';
         document.getElementById('warningBox').style.display = 'block';
     }
 
@@ -1239,11 +1296,8 @@ async function fetch24hStats(asset) {
             if (chg > 1) { trendEl.textContent = 'Бычий'; trendEl.className = 'v green'; }
             else if (chg < -1) { trendEl.textContent = 'Медвежий'; trendEl.className = 'v red'; }
             else { trendEl.textContent = 'Флэт'; trendEl.className = 'v'; }
-        } else if (asset.td && getTwelveKey()) {
-            const url = 'https://api.twelvedata.com/quote?symbol=' + encodeURIComponent(asset.td) + '&apikey=' + getTwelveKey();
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('fail');
-            const data = await res.json();
+        } else if (asset.td && getTwelveKeys().length > 0) {
+            const data = await fetchTwelveData('quote', 'symbol=' + encodeURIComponent(asset.td));
             if (data.status === 'error') throw new Error(data.message);
             const price = parseFloat(data.close);
             document.getElementById('statPrice').textContent = price.toFixed(asset.dec);
@@ -1327,11 +1381,9 @@ async function checkAutoSignal() {
             const json = await fetchWithProxy('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=15m&limit=50');
             if (!Array.isArray(json)) return;
             closes = json.map(function(k){return parseFloat(k[4]);});
-        } else if (asset.td && getTwelveKey()) {
-            const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50&apikey=' + getTwelveKey();
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.status === 'error' || !data.values) return;
+        } else if (asset.td && getTwelveKeys().length > 0) {
+            const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
+            if (!data.values) return;
             closes = data.values.slice().reverse().map(function(v){return parseFloat(v.close);});
         } else {
             const json = await fetchWithProxy('https://api.frankfurter.dev/v1/2025-01-01..?from=' + asset.base + '&to=' + asset.quote);
@@ -1382,11 +1434,9 @@ async function runScanner() {
                     const json = await fetchWithProxy('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=15m&limit=50');
                     if (!Array.isArray(json)) throw new Error('bad');
                     closes = json.map(function(k){return parseFloat(k[4]);});
-                } else if (asset.td && getTwelveKey()) {
-                    const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50&apikey=' + getTwelveKey();
-                    const res = await fetch(url);
-                    const data = await res.json();
-                    if (data.status === 'error' || !data.values) throw new Error('bad');
+                } else if (asset.td && getTwelveKeys().length > 0) {
+                    const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
+                    if (!data.values) throw new Error('bad');
                     closes = data.values.slice().reverse().map(function(v){return parseFloat(v.close);});
                 } else {
                     const json = await fetchWithProxy('https://api.frankfurter.dev/v1/2025-01-01..?from=' + asset.base + '&to=' + asset.quote);
@@ -1481,10 +1531,9 @@ async function updatePortfolioPrices() {
             if (asset.binance) {
                 const res = await fetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=' + asset.binance);
                 if (res.ok) { const data = await res.json(); t.current = parseFloat(data.price); }
-            } else if (asset.td && getTwelveKey()) {
-                const url = 'https://api.twelvedata.com/price?symbol=' + encodeURIComponent(asset.td) + '&apikey=' + getTwelveKey();
-                const res = await fetch(url);
-                if (res.ok) { const data = await res.json(); t.current = parseFloat(data.price); }
+            } else if (asset.td && getTwelveKeys().length > 0) {
+                const data = await fetchTwelveData('price', 'symbol=' + encodeURIComponent(asset.td));
+                t.current = parseFloat(data.price);
             } else if (asset.type === 'forex') {
                 const res = await fetch('https://api.frankfurter.dev/v1/latest?from=' + asset.base + '&to=' + asset.quote);
                 if (res.ok) { const data = await res.json(); t.current = data.rates[asset.quote]; }
