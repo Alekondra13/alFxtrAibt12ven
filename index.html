@@ -1019,13 +1019,25 @@ async function analyzeMarket() {
     if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.7);
     if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.3);
 
+    // === РАСЧЕТ SL/TP В ДОЛЛАРАХ ===
     let sltpHtml = '';
     if (dir !== 'WAIT') {
         const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
         const tpPrice = dir === 'UP' ? last + atr * 2 : last - atr * 2;
+        
+        const bal = parseFloat(document.getElementById('balanceInput').value) || 100;
+        const lot = calcAutoLot(key, bal, last);
+        const pipVal = asset.pipValFn ? asset.pipValFn(last) : asset.pipVal;
+        
+        const slDistancePips = Math.abs(last - slPrice) / asset.pip;
+        const tpDistancePips = Math.abs(tpPrice - last) / asset.pip;
+        
+        const lossUsd = (slDistancePips * pipVal * lot).toFixed(2);
+        const profitUsd = (tpDistancePips * pipVal * lot).toFixed(2);
+
         sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b><br>' +
-                   '<span class="sl">🛡 Стоп: ' + slPrice.toFixed(asset.dec) + '</span> | ' +
-                   '<span class="tp">💰 Тейк: ' + tpPrice.toFixed(asset.dec) + '</span>';
+                   '<span class="sl">🛡 Стоп: -$' + lossUsd + '</span> | ' +
+                   '<span class="tp">💰 Тейк: +$' + profitUsd + '</span>';
     }
     const timeMessage = (dir !== 'WAIT') ? '<br>⏱ Время сделки: <span class="conf">' + tradeMinutes + ' мин</span>' : '';
 
