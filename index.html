@@ -217,6 +217,15 @@
     .trade-pnl.negative { color: var(--red); }
     .btn-close-trade { background: rgba(255,69,58,0.1); color: var(--red); border: 1px solid rgba(255,69,58,0.3); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: 10px; font-size: 13px; font-family: inherit; }
     @media (max-width: 900px) { .trade-form { grid-template-columns: 1fr 1fr; } .btn-add { grid-column: span 2; } }
+
+    #lockBtn {
+        background: rgba(48,209,88,0.2); border: 1px solid rgba(48,209,88,0.4); color: var(--green);
+        width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 16px;
+        display: flex; align-items: center; justify-content: center; padding: 0;
+        font-family: inherit; transition: 0.2s; flex-shrink: 0;
+    }
+    #lockBtn:active { transform: scale(0.92); }
+    #lockHint { display: none; font-size: 11px; color: var(--orange); margin-bottom: 8px; padding: 6px 10px; background: rgba(255,159,10,0.1); border-radius: 8px; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -362,7 +371,11 @@
             <span id="keyStatusText">Ключи не установлены</span>
         </div>
 
-        <label class="settings-label">Twelve Data API Ключи (до 5 шт)</label>
+        <label class="settings-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Twelve Data API Ключи (до 5 шт)</span>
+            <button type="button" id="lockBtn" onclick="toggleKeysLock()" title="Заблокировать ключи">🔓</button>
+        </label>
+        <div id="lockHint">🔒 Ключи заблокированы от изменений. Нажмите замок выше, чтобы разблокировать.</div>
         <input type="text" id="twelveKeyInput1" placeholder="Ключ 1" style="margin-bottom: 6px;">
         <input type="text" id="twelveKeyInput2" placeholder="Ключ 2 (резерв)" style="margin-bottom: 6px;">
         <input type="text" id="twelveKeyInput3" placeholder="Ключ 3 (резерв)" style="margin-bottom: 6px;">
@@ -441,13 +454,25 @@
 })();
 
 function _0x4a2f() {
-    var _0x1 = document.getElementById('p_in').value;
-    var _0x2 = [];
-    for (var i = 0; i < _0x1.length; i++) {
-        _0x2.push(_0x1.charCodeAt(i) ^ 15);
-    }
-    var _0x3 = [78, 99, 91, 108, 121, 124, 62, 61, 105, 119, 55, 59, 110, 102];
-    if (JSON.stringify(_0x2) === JSON.stringify(_0x3)) {
+    var _x = document.getElementById('p_in').value;
+    var _k = (function(){
+        var _a = [94, -7, 199, -7, 201, -7, 58, -7, 59, -7];
+        var _b = [50, -7, 250, -7, 9, -7, 179, -7, 219, -7];
+        var _c = [221, -7, 211, -7, 166, -7, 232];
+        var _d = [];
+        for (var q = 0; q < _a.length; q++) if (_a[q] !== -7) _d.push(_a[q]);
+        for (var w = 0; w < _b.length; w++) if (_b[w] !== -7) _d.push(_b[w]);
+        for (var e = 0; e < _c.length; e++) if (_c[e] !== -7) _d.push(_c[e]);
+        var _e = [];
+        for (var i = 0; i < _d.length; i++) _e.push(_d[i] ^ ((55 + i * 11) % 256));
+        var _f = [];
+        for (var j = 0; j < _e.length; j++) _f.push((_e[j] - 19 + 256) % 256);
+        var _g = [];
+        for (var k = 0; k < _f.length; k++) _g.push(_f[k] ^ ((23 + k * 7) % 256));
+        return String.fromCharCode.apply(null, _g);
+    })();
+    
+    if (_x === _k) {
         document.getElementById('a1').style.display = 'none';
         localStorage.setItem('t_a', '1');
     } else {
@@ -462,16 +487,16 @@ const ASSETS = {
     EURUSD: { tvSym: 'FX:EURUSD', type:'forex', base:'EUR', quote:'USD', pip:0.0001, pipVal:10, dec:4, name:'EUR/USD', td:'EUR/USD', contract:100000 },
     GBPUSD: { tvSym: 'FX:GBPUSD', type:'forex', base:'GBP', quote:'USD', pip:0.0001, pipVal:10, dec:4, name:'GBP/USD', td:'GBP/USD', contract:100000 },
     USDJPY: { tvSym: 'FX:USDJPY', type:'forex', base:'USD', quote:'JPY', pip:0.01, pipValFn:p=>1000/p, dec:2, name:'USD/JPY', td:'USD/JPY', contract:100000 },
-    XAUUSD: { tvSym: 'BINANCE:PAXGUSDT', type:'crypto', binance:'PAXGUSDT', pip:0.1, pipVal:10, dec:2, name:'XAU/USD', td:'XAU/USD' },
-    BTCUSD: { tvSym: 'BINANCE:BTCUSDT', type:'crypto', binance:'BTCUSDT', pip:1, pipVal:1, dec:2, name:'BTC/USD' },
-    ETHUSD: { tvSym: 'BINANCE:ETHUSDT', type:'crypto', binance:'ETHUSDT', pip:0.1, pipVal:0.1, dec:2, name:'ETH/USD' },
-    SOLUSD: { tvSym: 'BINANCE:SOLUSDT', type:'crypto', binance:'SOLUSDT', pip:0.01, pipVal:0.01, dec:2, name:'SOL/USD' },
-    BNBUSD: { tvSym: 'BINANCE:BNBUSDT', type:'crypto', binance:'BNBUSDT', pip:0.1, pipVal:0.1, dec:2, name:'BNB/USD' },
-    XRPUSD: { tvSym: 'BINANCE:XRPUSDT', type:'crypto', binance:'XRPUSDT', pip:0.0001, pipVal:0.0001, dec:4, name:'XRP/USD' },
-    ADAUSD: { tvSym: 'BINANCE:ADAUSDT', type:'crypto', binance:'ADAUSDT', pip:0.0001, pipVal:0.0001, dec:4, name:'ADA/USD' },
-    DOGEUSD: { tvSym: 'BINANCE:DOGEUSDT', type:'crypto', binance:'DOGEUSDT', pip:0.0001, pipVal:0.0001, dec:4, name:'DOGE/USD' },
-    AVAXUSD: { tvSym: 'BINANCE:AVAXUSDT', type:'crypto', binance:'AVAXUSDT', pip:0.01, pipVal:0.01, dec:2, name:'AVAX/USD' },
-    LINKUSD: { tvSym: 'BINANCE:LINKUSDT', type:'crypto', binance:'LINKUSDT', pip:0.001, pipVal:0.001, dec:3, name:'LINK/USD' }
+    XAUUSD: { tvSym: 'BINANCE:PAXGUSDT', type:'crypto', pip:0.1, pipVal:10, dec:2, name:'XAU/USD', td:'XAU/USD' },
+    BTCUSD: { tvSym: 'BINANCE:BTCUSDT', type:'crypto', pip:1, pipVal:1, dec:2, name:'BTC/USD', td:'BTC/USD' },
+    ETHUSD: { tvSym: 'BINANCE:ETHUSDT', type:'crypto', pip:0.1, pipVal:0.1, dec:2, name:'ETH/USD', td:'ETH/USD' },
+    SOLUSD: { tvSym: 'BINANCE:SOLUSDT', type:'crypto', pip:0.01, pipVal:0.01, dec:2, name:'SOL/USD', td:'SOL/USD' },
+    BNBUSD: { tvSym: 'BINANCE:BNBUSDT', type:'crypto', pip:0.1, pipVal:0.1, dec:2, name:'BNB/USD', td:'BNB/USD' },
+    XRPUSD: { tvSym: 'BINANCE:XRPUSDT', type:'crypto', pip:0.0001, pipVal:0.0001, dec:4, name:'XRP/USD', td:'XRP/USD' },
+    ADAUSD: { tvSym: 'BINANCE:ADAUSDT', type:'crypto', pip:0.0001, pipVal:0.0001, dec:4, name:'ADA/USD', td:'ADA/USD' },
+    DOGEUSD:{ tvSym: 'BINANCE:DOGEUSDT', type:'crypto', pip:0.0001, pipVal:0.0001, dec:4, name:'DOGE/USD', td:'DOGE/USD' },
+    AVAXUSD:{ tvSym: 'BINANCE:AVAXUSDT', type:'crypto', pip:0.01, pipVal:0.01, dec:2, name:'AVAX/USD', td:'AVAX/USD' },
+    LINKUSD:{ tvSym: 'BINANCE:LINKUSDT', type:'crypto', pip:0.001, pipVal:0.001, dec:3, name:'LINK/USD', td:'LINK/USD' }
 };
 
 const FALLBACK_PRICES = {
@@ -497,7 +522,7 @@ function getTwelveKeys() {
         return keys.filter(k => k && k.trim().length > 5);
     } catch(e) { return []; }
 }
-function getLeverage() { return 999999; } // Всегда 1:∞, зафиксировано
+function getLeverage() { return 999999; }
 
 function updateKeyStatus() {
     const keys = getTwelveKeys();
@@ -511,6 +536,52 @@ function updateKeyStatus() {
     }
 }
 
+function isKeysLocked() { return safeGet('keys_locked') === '1'; }
+
+function toggleKeysLock() {
+    if (isKeysLocked()) {
+        if (confirm('⚠️ Разблокировать ключи?\n\nПосле разблокировки их можно будет случайно изменить или удалить.')) {
+            safeSet('keys_locked', '0');
+            updateLockUI();
+        }
+    } else {
+        safeSet('keys_locked', '1');
+        updateLockUI();
+    }
+}
+
+function updateLockUI() {
+    const locked = isKeysLocked();
+    const btn = document.getElementById('lockBtn');
+    const inputs = document.querySelectorAll('#settingsModal input[id^="twelveKeyInput"]');
+    const hint = document.getElementById('lockHint');
+    const saveBtn = document.querySelector('#settingsModal .btn-save');
+
+    inputs.forEach(input => {
+        input.readOnly = locked;
+        input.style.opacity = locked ? '0.55' : '1';
+        input.style.cursor = locked ? 'not-allowed' : 'text';
+        input.style.background = locked ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.35)';
+    });
+
+    if (btn) {
+        btn.textContent = locked ? '🔒' : '🔓';
+        btn.title = locked ? 'Разблокировать ключи' : 'Заблокировать ключи';
+        btn.style.background = locked ? 'rgba(255,159,10,0.2)' : 'rgba(48,209,88,0.2)';
+        btn.style.borderColor = locked ? 'rgba(255,159,10,0.4)' : 'rgba(48,209,88,0.4)';
+        btn.style.color = locked ? 'var(--orange)' : 'var(--green)';
+    }
+
+    if (hint) hint.style.display = locked ? 'block' : 'none';
+
+    if (saveBtn) {
+        saveBtn.disabled = locked;
+        saveBtn.style.opacity = locked ? '0.5' : '1';
+        saveBtn.style.pointerEvents = locked ? 'none' : 'auto';
+        saveBtn.textContent = locked ? '🔒 Ключи заблокированы' : '💾 Сохранить';
+    }
+}
+
 function openSettings() {
     try {
         const keys = getTwelveKeys();
@@ -519,11 +590,13 @@ function openSettings() {
             if (el) el.value = keys[i-1] || '';
         }
         updateKeyStatus();
+        updateLockUI();
         document.getElementById('settingsModal').classList.add('active');
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
 
 function saveSettings() {
+    if (isKeysLocked()) { alert('🔒 Ключи заблокированы. Разблокируйте для сохранения.'); return; }
     try {
         const keys = [];
         for (let i = 1; i <= 5; i++) {
@@ -539,7 +612,6 @@ function saveSettings() {
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
 
-// === РОТАТОР КЛЮЧЕЙ ===
 let currentKeyIndex = 0;
 async function fetchTwelveData(endpoint, params) {
     const keys = getTwelveKeys();
@@ -556,9 +628,9 @@ async function fetchTwelveData(endpoint, params) {
             if (data.status === 'error' || data.code === 429) {
                 console.warn(`Ключ ${idx+1} не сработал:`, data.message);
                 lastError = data.message || 'Limit reached';
-                continue; // Пробуем следующий ключ
+                continue;
             }
-            currentKeyIndex = idx; // Запоминаем рабочий ключ
+            currentKeyIndex = idx;
             return data;
         } catch(e) {
             console.warn(`Ключ ${idx+1} ошибка сети`);
@@ -567,7 +639,6 @@ async function fetchTwelveData(endpoint, params) {
     }
     throw new Error('Все ключи исчерпаны или неверны. ' + (lastError || ''));
 }
-// ======================
 
 function showScan() { document.getElementById('scanOverlay').classList.add('active'); updateScan(0, 'Инициализация...'); }
 function updateScan(p, t) {
@@ -596,7 +667,7 @@ function calcMargin(key, lot, price) {
     if (!asset || asset.type !== 'forex' || !lot) return 0;
     const p = price || FALLBACK_PRICES[key] || 1;
     const lev = getLeverage();
-    if (lev >= 999999) return 0; // 1:∞
+    if (lev >= 999999) return 0;
     if (asset.base === 'USD') return (lot * asset.contract) / lev;
     return (lot * asset.contract * p) / lev;
 }
@@ -628,7 +699,6 @@ function updateRisk() {
 
     if (asset.type === 'forex') {
         const margin = calcMargin(key, calculatedLot, currentPrice);
-        
         if (calculatedLot === 0.01 && bal < 150) {
             hintEl.className = 'lot-hint show warn';
             hintEl.textContent = '⚠️ Мин. лот: риск $' + realRisk.toFixed(2) + ' (' + realRiskPct.toFixed(1) + '% от баланса)';
@@ -747,14 +817,12 @@ async function toggleChart() {
 async function loadTradingView() {
     const key = document.getElementById('pairSelect').value;
     const asset = ASSETS[key];
-    let tvInterval = '15';
-    if (getTwelveKeys().length > 0 || asset.binance) {
+    let tvInterval = 'D';
+    if (getTwelveKeys().length > 0 && asset.td) {
         try {
             const tf = await getBestTimeframe(asset);
             tvInterval = tf === '1h' ? '60' : tf === '4h' ? '240' : tf === '1d' ? 'D' : '15';
         } catch(e) {}
-    } else {
-        tvInterval = 'D';
     }
     const tvUrl = 'https://s.tradingview.com/widgetembed/?symbol=' + asset.tvSym + '&interval=' + tvInterval + '&hidetoptoolbar=1&theme=dark&style=1&locale=ru&toolbarbg=rgba(5,5,5,1)&enable_publishing=0&withdateranges=1&hide_side_toolbar=1';
     const iframe = document.getElementById('tvIframe');
@@ -858,24 +926,15 @@ function isMarketOpen(asset) {
 }
 
 async function getBestTimeframe(asset) {
-    if (!asset.binance && getTwelveKeys().length === 0) return '1d';
+    if (getTwelveKeys().length === 0 || !asset.td) return '1d';
     const tfs = ['15min', '1h', '4h'];
     let bestTf = '15min', maxAdx = 0;
     for (const tf of tfs) {
         try {
-            let highs = [], lows = [], closes = [];
-            if (asset.binance) {
-                const interval = tf === '15min' ? '15m' : tf;
-                const res = await fetch('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=' + interval + '&limit=50');
-                if (!res.ok) continue;
-                const json = await res.json();
-                if (!Array.isArray(json) || json.length < 30) continue;
-                json.forEach(k => { highs.push(parseFloat(k[2])); lows.push(parseFloat(k[3])); closes.push(parseFloat(k[4])); });
-            } else if (asset.td) {
-                const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tf + '&outputsize=50');
-                if (!data.values || data.values.length < 30) continue;
-                data.values.forEach(v => { highs.push(parseFloat(v.high)); lows.push(parseFloat(v.low)); closes.push(parseFloat(v.close)); });
-            } else continue;
+            const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tf + '&outputsize=50');
+            if (!data.values || data.values.length < 30) continue;
+            const highs = [], lows = [], closes = [];
+            data.values.forEach(v => { highs.push(parseFloat(v.high)); lows.push(parseFloat(v.low)); closes.push(parseFloat(v.close)); });
             const adxData = calcADX(highs, lows, closes, 14);
             if (adxData.adx > maxAdx) { maxAdx = adxData.adx; bestTf = tf; }
         } catch(e) {}
@@ -884,46 +943,23 @@ async function getBestTimeframe(asset) {
 }
 
 async function fetchDataForAsset(asset) {
-    if (asset.binance) {
-        const tf = await getBestTimeframe(asset);
-        const json = await fetchWithProxy('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=' + tf + '&limit=100');
-        if (!Array.isArray(json) || json.length < 30) throw new Error('Мало данных');
-        const r = { opens: [], highs: [], lows: [], closes: [], volumes: [], tf: tf };
-        json.forEach(k => {
-            r.opens.push(parseFloat(k[1])); r.highs.push(parseFloat(k[2]));
-            r.lows.push(parseFloat(k[3])); r.closes.push(parseFloat(k[4]));
-            r.volumes.push(parseFloat(k[5]));
-        });
-        return r;
-    }
-    if (asset.td && getTwelveKeys().length > 0) {
-        const tf = await getBestTimeframe(asset);
-        const tfMap = { '15m': '15min', '1h': '1h', '4h': '4h' };
-        const tdTf = tfMap[tf] || '15min';
-        
-        const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tdTf + '&outputsize=100');
-        
-        if (!data.values || data.values.length < 30) throw new Error(data.message || 'Мало данных');
-        const values = data.values.slice().reverse();
-        const r = { opens: [], highs: [], lows: [], closes: [], volumes: [], tf: tf };
-        values.forEach(v => {
-            r.opens.push(parseFloat(v.open)); r.highs.push(parseFloat(v.high));
-            r.lows.push(parseFloat(v.low)); r.closes.push(parseFloat(v.close));
-            r.volumes.push(parseFloat(v.volume) || 0);
-        });
-        return r;
-    }
-    const json = await fetchWithProxy('https://api.frankfurter.dev/v1/2025-01-01..?from=' + asset.base + '&to=' + asset.quote);
-    if (!json || !json.rates) throw new Error('Bad API');
-    const vals = Object.values(json.rates).map(r=>r[asset.quote]).filter(v => typeof v === 'number');
-    if (vals.length < 30) throw new Error('Мало данных');
-    const r = { opens: [], highs: [], lows: [], closes: [], volumes: [], tf: '1d' };
-    for (let i=0; i<vals.length; i++) {
-        r.closes.push(vals[i]);
-        r.opens.push(i>0 ? vals[i-1] : vals[i]);
-        r.highs.push(Math.max(vals[i], r.opens[i]));
-        r.lows.push(Math.min(vals[i], r.opens[i]));
-    }
+    if (getTwelveKeys().length === 0) throw new Error('Добавьте Twelve Data API ключи в настройках');
+    if (!asset.td) throw new Error('Символ не поддерживается Twelve Data');
+
+    const tf = await getBestTimeframe(asset);
+    const tfMap = { '15m': '15min', '1h': '1h', '4h': '4h' };
+    const tdTf = tfMap[tf] || '15min';
+
+    const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=' + tdTf + '&outputsize=100');
+
+    if (!data.values || data.values.length < 30) throw new Error(data.message || 'Мало данных');
+    const values = data.values.slice().reverse();
+    const r = { opens: [], highs: [], lows: [], closes: [], volumes: [], tf: tf };
+    values.forEach(v => {
+        r.opens.push(parseFloat(v.open)); r.highs.push(parseFloat(v.high));
+        r.lows.push(parseFloat(v.low)); r.closes.push(parseFloat(v.close));
+        r.volumes.push(parseFloat(v.volume) || 0);
+    });
     return r;
 }
 
@@ -972,7 +1008,7 @@ async function analyzeMarket() {
         data = await fetchDataForAsset(asset);
     } catch(e) {
         hideScan();
-        alert('Ошибка данных: ' + e.message + '\n\nДля форекса добавьте Twelve Data ключи в настройках');
+        alert('Ошибка данных: ' + e.message + '\n\nДобавьте Twelve Data ключи в настройках (⚙️)');
         btn.disabled = false;
         btn.textContent = '⚡ ЗАПУСТИТЬ ИИ';
         return;
@@ -1066,7 +1102,6 @@ async function analyzeMarket() {
     if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.7);
     if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.3);
 
-    // === ПРОВЕРКА РИСКА ПО СТОП-ЛОССУ ===
     let sltpHtml = '';
     if (dir !== 'WAIT') {
         const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
@@ -1120,9 +1155,6 @@ async function analyzeMarket() {
 
     if (news.hasNews) {
         document.getElementById('warningBox').innerHTML = news.message;
-        document.getElementById('warningBox').style.display = 'block';
-    } else if (asset.type === 'forex' && getTwelveKeys().length === 0) {
-        document.getElementById('warningBox').innerHTML = '⚠️ Форекс без Twelve Data ключа: используются дневные данные. Добавьте ключи в настройках';
         document.getElementById('warningBox').style.display = 'block';
     }
 
@@ -1254,13 +1286,6 @@ function calcBollingerBands(data, period, mult) {
     return { upper: sma + mult*sd, lower: sma - mult*sd };
 }
 
-async function fetchWithProxy(url) {
-    try { const r = await fetch(url); if (r.ok) return await r.json(); } catch(e) {}
-    try { const p = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url); const r = await fetch(p); if (r.ok) return await r.json(); } catch(e) {}
-    const r2 = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    return await r2.json();
-}
-
 function changePair() {
     document.getElementById('signalBox').style.display = 'none';
     document.getElementById('aiBox').style.display = 'none';
@@ -1283,43 +1308,20 @@ function changePair() {
 async function fetch24hStats(asset) {
     if (!asset) return;
     try {
-        if (asset.type === 'crypto') {
-            const res = await fetch('https://data-api.binance.vision/api/v3/ticker/24hr?symbol=' + asset.binance);
-            if (!res.ok) throw new Error('fail');
-            const data = await res.json();
-            document.getElementById('statPrice').textContent = parseFloat(data.lastPrice).toFixed(asset.dec);
-            document.getElementById('statHighLow').textContent = parseFloat(data.highPrice).toFixed(asset.dec) + ' / ' + parseFloat(data.lowPrice).toFixed(asset.dec);
-            document.getElementById('statVol').textContent = (parseFloat(data.volume)/1000).toFixed(1) + 'K';
-            currentPrice = parseFloat(data.lastPrice);
-            const chg = parseFloat(data.priceChangePercent);
-            const trendEl = document.getElementById('statTrend');
-            if (chg > 1) { trendEl.textContent = 'Бычий'; trendEl.className = 'v green'; }
-            else if (chg < -1) { trendEl.textContent = 'Медвежий'; trendEl.className = 'v red'; }
-            else { trendEl.textContent = 'Флэт'; trendEl.className = 'v'; }
-        } else if (asset.td && getTwelveKeys().length > 0) {
-            const data = await fetchTwelveData('quote', 'symbol=' + encodeURIComponent(asset.td));
-            if (data.status === 'error') throw new Error(data.message);
-            const price = parseFloat(data.close);
-            document.getElementById('statPrice').textContent = price.toFixed(asset.dec);
-            document.getElementById('statHighLow').textContent = parseFloat(data.high).toFixed(asset.dec) + ' / ' + parseFloat(data.low).toFixed(asset.dec);
-            document.getElementById('statVol').textContent = '—';
-            currentPrice = price;
-            const chg = parseFloat(data.percent_change);
-            const trendEl = document.getElementById('statTrend');
-            if (chg > 0.1) { trendEl.textContent = 'Бычий'; trendEl.className = 'v green'; }
-            else if (chg < -0.1) { trendEl.textContent = 'Медвежий'; trendEl.className = 'v red'; }
-            else { trendEl.textContent = 'Флэт'; trendEl.className = 'v'; }
-        } else {
-            const res = await fetch('https://api.frankfurter.dev/v1/latest?from=' + asset.base + '&to=' + asset.quote);
-            if (!res.ok) throw new Error('fail');
-            const data = await res.json();
-            document.getElementById('statPrice').textContent = data.rates[asset.quote].toFixed(asset.dec);
-            document.getElementById('statHighLow').textContent = '— / —';
-            document.getElementById('statVol').textContent = '—';
-            const tr = document.getElementById('statTrend');
-            tr.textContent = '—'; tr.className = 'v';
-            currentPrice = data.rates[asset.quote];
-        }
+        if (getTwelveKeys().length === 0 || !asset.td) throw new Error('Нет ключей');
+        const data = await fetchTwelveData('quote', 'symbol=' + encodeURIComponent(asset.td));
+        if (data.status === 'error') throw new Error(data.message);
+        const price = parseFloat(data.close);
+        document.getElementById('statPrice').textContent = price.toFixed(asset.dec);
+        document.getElementById('statHighLow').textContent = parseFloat(data.high).toFixed(asset.dec) + ' / ' + parseFloat(data.low).toFixed(asset.dec);
+        document.getElementById('statVol').textContent = data.volume ? (parseFloat(data.volume)/1000).toFixed(1) + 'K' : '—';
+        currentPrice = price;
+        const chg = parseFloat(data.percent_change);
+        const trendEl = document.getElementById('statTrend');
+        const chgThreshold = asset.type === 'forex' ? 0.1 : 1;
+        if (chg > chgThreshold) { trendEl.textContent = 'Бычий'; trendEl.className = 'v green'; }
+        else if (chg < -chgThreshold) { trendEl.textContent = 'Медвежий'; trendEl.className = 'v red'; }
+        else { trendEl.textContent = 'Флэт'; trendEl.className = 'v'; }
         updateRisk();
     } catch(e) {
         document.getElementById('statPrice').textContent = '—';
@@ -1351,6 +1353,11 @@ function getRiskPercent(b) { if (b <= 20) return 6.0; if (b <= 50) return 4.5; r
 
 function toggleAutoSignals(cb) {
     if (cb.checked) {
+        if (getTwelveKeys().length === 0) {
+            alert('⚠️ Для авто-сигналов добавьте Twelve Data API ключи в настройках');
+            cb.checked = false;
+            return;
+        }
         if (!('Notification' in window)) { alert('Браузер не поддерживает уведомления'); cb.checked = false; return; }
         Notification.requestPermission().then(function(p) {
             if (p === 'granted') {
@@ -1371,25 +1378,15 @@ async function checkAutoSignal() {
     const key = document.getElementById('pairSelect').value;
     const asset = ASSETS[key];
     if (!asset || !isMarketOpen(asset).open) return;
-    
+    if (getTwelveKeys().length === 0 || !asset.td) return;
+
     const news = await checkNewsFilter(asset);
     if (news.hasNews) return;
 
     try {
-        let closes = [];
-        if (asset.binance) {
-            const json = await fetchWithProxy('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=15m&limit=50');
-            if (!Array.isArray(json)) return;
-            closes = json.map(function(k){return parseFloat(k[4]);});
-        } else if (asset.td && getTwelveKeys().length > 0) {
-            const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
-            if (!data.values) return;
-            closes = data.values.slice().reverse().map(function(v){return parseFloat(v.close);});
-        } else {
-            const json = await fetchWithProxy('https://api.frankfurter.dev/v1/2025-01-01..?from=' + asset.base + '&to=' + asset.quote);
-            if (!json || !json.rates) return;
-            closes = Object.values(json.rates).map(function(r){return r[asset.quote];});
-        }
+        const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
+        if (!data.values) return;
+        const closes = data.values.slice().reverse().map(v => parseFloat(v.close));
         if (closes.length < 22) return;
         const ema9 = calcEMA(closes, 9), ema21 = calcEMA(closes, 21);
         const last9 = ema9[ema9.length-1], last21 = ema21[ema21.length-1];
@@ -1402,6 +1399,10 @@ async function checkAutoSignal() {
 }
 
 async function runScanner() {
+    if (getTwelveKeys().length === 0) {
+        alert('⚠️ Для работы сканера добавьте Twelve Data API ключи в настройках');
+        return;
+    }
     try {
         showScan();
         await sleep(150);
@@ -1429,21 +1430,10 @@ async function runScanner() {
             }
 
             try {
-                let closes = [];
-                if (asset.binance) {
-                    const json = await fetchWithProxy('https://data-api.binance.vision/api/v3/klines?symbol=' + asset.binance + '&interval=15m&limit=50');
-                    if (!Array.isArray(json)) throw new Error('bad');
-                    closes = json.map(function(k){return parseFloat(k[4]);});
-                } else if (asset.td && getTwelveKeys().length > 0) {
-                    const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
-                    if (!data.values) throw new Error('bad');
-                    closes = data.values.slice().reverse().map(function(v){return parseFloat(v.close);});
-                } else {
-                    const json = await fetchWithProxy('https://api.frankfurter.dev/v1/2025-01-01..?from=' + asset.base + '&to=' + asset.quote);
-                    if (!json || !json.rates) throw new Error('bad');
-                    closes = Object.values(json.rates).map(function(r){return r[asset.quote];});
-                }
-                if (closes.length < 22) { results.push({ key:key, asset:asset, dir:'WAIT', score:0, last:0 }); continue; }
+                if (!asset.td) throw new Error('no td');
+                const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
+                if (!data.values || data.values.length < 22) throw new Error('bad');
+                const closes = data.values.slice().reverse().map(v => parseFloat(v.close));
                 const ema9 = calcEMA(closes, 9), ema21 = calcEMA(closes, 21);
                 const score = (ema9[ema9.length-1] > ema21[ema21.length-1]) ? 1 : -1;
                 results.push({ key:key, asset:asset, dir:score >= 1 ? 'UP':'DOWN', score:score, last:closes[closes.length-1] });
@@ -1524,20 +1514,14 @@ function renderTrades() {
 async function updatePortfolioPrices() {
     let trades = getTrades();
     if (trades.length === 0) { renderTrades(); return; }
+    if (getTwelveKeys().length === 0) return;
+
     for (let t of trades) {
         const asset = ASSETS[t.pair];
-        if (!asset) continue;
+        if (!asset || !asset.td) continue;
         try {
-            if (asset.binance) {
-                const res = await fetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=' + asset.binance);
-                if (res.ok) { const data = await res.json(); t.current = parseFloat(data.price); }
-            } else if (asset.td && getTwelveKeys().length > 0) {
-                const data = await fetchTwelveData('price', 'symbol=' + encodeURIComponent(asset.td));
-                t.current = parseFloat(data.price);
-            } else if (asset.type === 'forex') {
-                const res = await fetch('https://api.frankfurter.dev/v1/latest?from=' + asset.base + '&to=' + asset.quote);
-                if (res.ok) { const data = await res.json(); t.current = data.rates[asset.quote]; }
-            }
+            const data = await fetchTwelveData('price', 'symbol=' + encodeURIComponent(asset.td));
+            if (data.price) t.current = parseFloat(data.price);
         } catch(e) {}
     }
     saveTrades(trades);
