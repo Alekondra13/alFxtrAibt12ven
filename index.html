@@ -15,7 +15,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     html, body { height: 100%; overscroll-behavior: none; }
-    body { font-family: var(--font); color: var(--text); height: 100vh; width: 100vw; display: flex; justify-content: center; overflow: hidden; font-size: 15px; background: var(--bg); }
+    body { font-family: var(--font); color: var(--text); height: 100dvh; width: 100vw; display: flex; justify-content: center; overflow: hidden; font-size: 15px; background: var(--bg); }
     body::before { content: ''; position: fixed; inset: -30px; background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=70&auto=format&fit=crop'); background-size: cover; background-position: center; filter: blur(8px) brightness(0.42) saturate(0.9); z-index: -2; pointer-events: none; }
     body::after { content: ''; position: fixed; inset: 0; background-image: radial-gradient(circle at 10% 10%, rgba(10, 132, 255, 0.1) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(48, 209, 88, 0.07) 0%, transparent 40%); z-index: -1; pointer-events: none; }
     .terminal-container { width: 100%; height: 100%; display: flex; justify-content: center; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -86,8 +86,7 @@
     .stat-item .v.red { color: var(--red); }
     .bottom-actions { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0 24px 24px; }
     .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 14px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; font-family: inherit; }
-    .btn-secondary:active { background: rgba(255,255,255,0.14); transform: scale(0.97); }
-    #scanOverlay { position: fixed; inset: 0; z-index: 10000; background: rgba(5, 5, 5, 0.92); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+    .btn-secondary:active { background: rgba(255,255,255,0.14); transform: scale(0.97); }    #scanOverlay { position: fixed; inset: 0; z-index: 10000; background: rgba(5, 5, 5, 0.92); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
     #scanOverlay.active { display: flex; opacity: 1; }
     .scan-content { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 30px; max-width: 380px; width: 90%; }
     .scan-radar { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
@@ -111,12 +110,12 @@
     .chart-header-bar { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; background: rgba(24, 24, 26, 0.45); backdrop-filter: blur(22px); border-bottom: 1px solid var(--border); z-index: 10; }
     .chart-header-bar h3 { font-size: 16px; font-weight: 700; color: #fff; margin: 0; }
     .chart-close-btn { background: rgba(255, 69, 58, 0.15); color: var(--red); border: 1px solid rgba(255, 69, 58, 0.3); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .chart-split-layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .chart-pane { flex: 1; width: 100%; min-height: 300px; background: #000; position: relative; }
+    .chart-split-layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .chart-pane { flex: 1; width: 100%; min-height: 0; background: #000; position: relative; }
     .chart-pane iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-    .ai-pane { flex: 1; width: 100%; background: rgba(24, 24, 26, 0.35); backdrop-filter: blur(18px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
-    .chat-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-    .chat-messages { flex: 1; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
+    .ai-pane { flex: 1; width: 100%; background: rgba(24, 24, 26, 0.35); backdrop-filter: blur(18px); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    .chat-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; min-height: 0; }
+    .chat-messages { flex: 1; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; min-height: 0; -webkit-overflow-scrolling: touch; }
     .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 13px; line-height: 1.5; word-wrap: break-word; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
     .chat-msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
     .chat-msg.ai { background: rgba(191, 90, 242, 0.22); border: 1px solid rgba(191, 90, 242, 0.4); color: #f0e6f8; align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(12px); }
@@ -227,7 +226,7 @@
             </div>
             <div class="control-group">
                 <label>Баланс (USD)</label>
-                <input type="number" id="balanceInput" value="11" min="1" step="1" oninput="updateRisk()">
+                <input type="number" id="balanceInput" placeholder="Введите баланс" min="1" step="1" oninput="updateRisk()">
                 <div class="risk-row"><div class="risk-display"><span>Риск</span><strong id="riskValue">—</strong></div><div class="risk-display lot"><span>Лот</span><strong id="autoLotValue">—</strong></div></div>
                 <div class="lot-hint" id="lotHint"></div>
             </div>
@@ -283,6 +282,10 @@
         <input type="text" id="twelveKeyInput4" placeholder="Ключ 4 (резерв)" style="margin-bottom: 6px;">
         <input type="text" id="twelveKeyInput5" placeholder="Ключ 5 (резерв)" style="margin-bottom: 6px;">
         <div class="settings-help">Бесплатно: <a href="https://twelvedata.com/register" target="_blank">twelvedata.com/register</a></div>
+        <label class="settings-label" style="margin-top: 18px;">🧠 AI API (опционально — если 402)</label>
+        <input type="text" id="aiApiUrl" placeholder="https://api.openai.com/v1/chat/completions" style="margin-bottom: 6px;">
+        <input type="text" id="aiApiKey" placeholder="API ключ (OpenAI / Groq / OpenRouter)" style="margin-bottom: 6px;">
+        <div class="settings-help">Пусто = бесплатный Pollinations (может падать 402). Свой ключ = стабильно. Бесплатные: <a href="https://console.groq.com/keys" target="_blank">Groq</a>, <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a>.</div>
         <button class="btn-save" onclick="saveSettings()">💾 Сохранить</button>
     </div>
 </div>
@@ -419,6 +422,8 @@ function openSettings() {
     try {
         const keys = getTwelveKeys();
         for (let i = 1; i <= 5; i++) { const el = document.getElementById('twelveKeyInput' + i); if (el) el.value = keys[i-1] || ''; }
+        const aiUrl = document.getElementById('aiApiUrl'); if (aiUrl) aiUrl.value = safeGet('ai_api_url') || '';
+        const aiKey = document.getElementById('aiApiKey'); if (aiKey) aiKey.value = safeGet('ai_api_key') || '';
         updateKeyStatus(); updateLockUI();
         document.getElementById('settingsModal').classList.add('active');
     } catch(e) { alert('Ошибка: ' + e.message); }
@@ -430,6 +435,10 @@ function saveSettings() {
         const keys = [];
         for (let i = 1; i <= 5; i++) { const val = document.getElementById('twelveKeyInput' + i).value.trim(); if (val) keys.push(val); }
         if (keys.length > 0) safeSet('twelve_api_keys', JSON.stringify(keys)); else safeDel('twelve_api_keys');
+        const aiUrlVal = (document.getElementById('aiApiUrl')?.value || '').trim();
+        const aiKeyVal = (document.getElementById('aiApiKey')?.value || '').trim();
+        if (aiUrlVal) safeSet('ai_api_url', aiUrlVal); else safeDel('ai_api_url');
+        if (aiKeyVal) safeSet('ai_api_key', aiKeyVal); else safeDel('ai_api_key');
         tfCache = {};
         updateKeyStatus(); closeModal('settingsModal'); updateRisk();
         try { changePair(); } catch(e) {}
@@ -500,7 +509,6 @@ function updateRisk() {
     const key = document.getElementById('pairSelect').value;
     const calculatedLot = calcAutoLot(key, bal, currentPrice);
     lotEl.textContent = parseFloat(calculatedLot.toFixed(3));
-    const asset = ASSETS[key];
     const realRisk = calcRealRisk(key, calculatedLot, currentPrice);
     const realRiskPct = bal > 0 ? (realRisk / bal * 100) : 0;
     if (calculatedLot === 0.01 && bal < 150) { hintEl.className = 'lot-hint show warn'; hintEl.textContent = '⚠️ Мин. лот: риск $' + realRisk.toFixed(2) + ' (' + realRiskPct.toFixed(1) + '%)'; }
@@ -571,19 +579,49 @@ async function askAI() {
     try {
         const key = document.getElementById('pairSelect').value;
         const asset = ASSETS[key];
-        const balance = document.getElementById('balanceInput').value;
+        const balance = document.getElementById('balanceInput').value || '—';
         const lot = document.getElementById('autoLotValue').textContent;
         const trend = document.getElementById('statTrend').textContent;
         const price = document.getElementById('statPrice').textContent;
-        let sysPrompt = 'Ты — Tuchkov AI, элитный трейдер-наставник. Отвечай ТОЛЬКО на русском, конкретно, с цифрами и примерами. БЕЗ воды. Структурируй эмодзи: 📈📉⚠️💡🎯✅❌🔥🛡️.\n\nЭКСПЕРТИЗА:\n• Теханализ: свечи, паттерны, уровни, тренды, Fibonacci, Elliott, Volume Profile, SMC/ICT.\n• Индикаторы: EMA, RSI, MACD, Bollinger, ADX, ATR, StochRSI, Ichimoku, PSAR, VWAP, OBV.\n• Риск-менеджмент: 1-2% на сделку, RR мин 1:2, Kelly, диверсификация.\n• Психология: FOMO, тильт, страх, жадность, дисциплина.\n• Стратегии: скальпинг, дейтрейдинг, свинг, позиционка.\n• Фундамент: ФРС/ЕЦБ/BoE/BoJ, NFP/CPI/PPI/GDP/PMI, корреляции, сессии.\n• Крипта: халвинги, on-chain (MVRV, SOPR, funding, OI), альтсезоны.\n• Форекс: пипсы, лоты, маржа, свопы, кэрри-трейд.\n• Бинарки: экспирации 1m-1d, winrate >55% при 80%.\n\nПРАВИЛА:\n1. Только русский.\n2. Конкретика, цифры, примеры.\n3. Длинное — списком.\n4. Про сигнал — ссылайся на данные ниже.\n5. Напоминай про риски, но отвечай.\n\n📊 КАРТОЧКА:\n• Инструмент: ' + asset.name + '\n• Цена: ' + price + '\n• Тренд 24ч: ' + trend + '\n• Баланс: $' + balance + '\n• Лот: ' + lot;
+        let sysPrompt = 'Ты — Tuchkov AI, элитный трейдер-наставник. Отвечай ТОЛЬКО на русском, конкретно, с цифрами и примерами. БЕЗ воды. Структурируй эмодзи: 📈📉⚠️💡🎯✅❌🔥🛡️.\n\nЭКСПЕРТИЗА:\n• Теханализ: свечи, паттерны, уровни, тренды, Fibonacci, Elliott, Volume Profile, SMC/ICT.\n• Индикаторы: EMA, RSI, MACD, Bollinger, ADX, ATR, StochRSI, Ichimoku, PSAR, VWAP, OBV.\n• Риск-менеджмент: 1-2% на сделку, RR мин 1:2.\n• Психология: FOMO, тильт, страх, жадность, дисциплина.\n• Стратегии: скальпинг, дейтрейдинг, свинг, позиционка.\n• Фундамент: ФРС/ЕЦБ/BoE/BoJ, NFP/CPI/PPI/GDP/PMI.\n• Крипта: халвинги, on-chain, funding, OI, альтсезоны.\n• Форекс: пипсы, лоты, маржа, свопы, кэрри-трейд.\n\nПРАВИЛА: 1. Только русский. 2. Конкретика. 3. Длинное — списком. 4. Про сигнал — ссылайся на данные ниже. 5. Напоминай про риски.\n\n📊 КАРТОЧКА:\n• Инструмент: ' + asset.name + '\n• Цена: ' + price + '\n• Тренд 24ч: ' + trend + '\n• Баланс: $' + balance + '\n• Лот: ' + lot;
         if (lastAnalysisContext) sysPrompt += '\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ:\n' + lastAnalysisContext;
         else sysPrompt += '\n\n⚠️ Анализа ещё не было. Если спросят про сигнал — предложи нажать "⚡ ЗАПУСТИТЬ ИИ".';
         const messages = [{ role: 'system', content: sysPrompt }].concat(chatHistory);
-        const baseBody = { model: 'openai', messages: messages, temperature: 0.65, max_tokens: 800, seed: Math.floor(Math.random() * 999999) };
-        let reply = null; let lastError = null;
-        try { const text = await aiFetch('https://text.pollinations.ai/openai', baseBody, 28000); const parsed = parseAIResponse(text); if (parsed && parsed.trim().length >= 2) reply = parsed.trim(); } catch(e) { lastError = e.message; }
-        if (!reply) { try { const text = await aiFetch('https://text.pollinations.ai/', baseBody, 28000); const parsed = parseAIResponse(text); if (parsed && parsed.trim().length >= 2) reply = parsed.trim(); } catch(e) { lastError = e.message; } }
-        if (!reply) { try { const backupBody = Object.assign({}, baseBody, { model: 'mistral' }); const text = await aiFetch('https://text.pollinations.ai/openai', backupBody, 28000); const parsed = parseAIResponse(text); if (parsed && parsed.trim().length >= 2) reply = parsed.trim(); } catch(e) { lastError = e.message; } }
+        let reply = null; let lastError = 'Все AI-сервисы недоступны';
+
+        const customUrl = safeGet('ai_api_url');
+        const customKey = safeGet('ai_api_key');
+        if (customUrl && customKey) {
+            try {
+                const res = await fetch(customUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + customKey },
+                    body: JSON.stringify({ model: 'gpt-4o-mini', messages: messages, temperature: 0.65, max_tokens: 800 })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const c = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+                    if (c && c.trim().length > 2) reply = c.trim();
+                } else { lastError = 'Custom API: HTTP ' + res.status; }
+            } catch(e) { lastError = 'Custom: ' + e.message; }
+        }
+
+        if (!reply) {
+            const variants = [
+                { model: 'openai', label: 'OpenAI' },
+                { model: 'openai-fast', label: 'OpenAI-Fast' },
+                { model: 'mistral', label: 'Mistral' }
+            ];
+            for (const v of variants) {
+                try {
+                    const body = { model: v.model, messages: messages, temperature: 0.65, max_tokens: 800 };
+                    const text = await aiFetch('https://text.pollinations.ai/openai', body, 20000);
+                    const parsed = parseAIResponse(text);
+                    if (parsed && parsed.trim().length > 2) { reply = parsed.trim(); break; }
+                } catch(e) { lastError = v.label + ': ' + e.message; }
+            }
+        }
+
         const typingEl = document.getElementById('aiTyping');
         if (typingEl) typingEl.remove();
         if (reply) {
@@ -591,7 +629,7 @@ async function askAI() {
             if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
             addChatMessage(reply, 'ai');
         } else {
-            addChatMessage('⚠️ Не могу подключиться к ИИ.\nПричина: ' + (lastError || 'неизвестна') + '\nПроверь интернет и попробуй снова.', 'ai');
+            addChatMessage('⚠️ Все AI-сервисы вернули ошибку.\nПричина: ' + lastError + '\n\n💡 Открой ⚙️ Настройки → поле "AI API" и вставь свой бесплатный ключ (например, с groq.com — 1 минута регистрации, работает стабильно).', 'ai');
         }
     } catch (fatalError) {
         const typingEl = document.getElementById('aiTyping'); if (typingEl) typingEl.remove();
@@ -612,7 +650,6 @@ async function toggleChart() {
     } else {
         overlay.classList.remove('active');
         isChartOpen = false;
-        document.getElementById('tvIframe').src = 'about:blank';
     }
 }
 
@@ -620,10 +657,11 @@ async function loadTradingView() {
     const key = document.getElementById('pairSelect').value;
     const asset = ASSETS[key];
     let tvInterval = '15';
+    const map = { '1min':'1', '5min':'5', '15min':'15', '30min':'30', '1h':'60' };
     if (getTwelveKeys().length > 0 && asset.td) {
-        try { const tf = await getBestTimeframe(asset); tvInterval = tf === '30min' ? '30' : '15'; } catch(e) {}
+        try { const tf = await getBestTimeframe(asset); tvInterval = map[tf] || '15'; } catch(e) {}
     }
-    const tvUrl = 'https://s.tradingview.com/widgetembed/?symbol=' + asset.tvSym + '&interval=' + tvInterval + '&hidetoptoolbar=1&theme=dark&style=1&locale=ru&toolbarbg=rgba(5,5,5,1)&enable_publishing=0&withdateranges=1&hide_side_toolbar=1';
+    const tvUrl = 'https://s.tradingview.com/widgetembed/?symbol=' + asset.tvSym + '&interval=' + tvInterval + '&hidetoptoolbar=1&theme=dark&style=1&locale=ru&enable_publishing=0&withdateranges=1&hide_side_toolbar=1';
     const iframe = document.getElementById('tvIframe');
     if (iframe.src !== tvUrl) iframe.src = tvUrl;
 }
@@ -689,7 +727,7 @@ async function getBestTimeframe(asset) {
     const now = Date.now();
     const cached = tfCache[asset.td];
     if (cached && (now - cached.ts) < 10 * 60 * 1000) return cached.tf;
-    const tfs = ['15min', '30min'];
+    const tfs = ['1min', '5min', '15min', '30min', '1h'];
     let bestTf = '15min', maxAdx = 0;
     for (const tf of tfs) {
         try {
@@ -745,7 +783,7 @@ async function fetchDataForAsset(asset) {
         const news = await checkNewsFilter(asset);
         updateScan(15, 'Загрузка данных...'); await sleep(200);
         let data;
-        try { updateScan(22, 'Авто-подбор ТФ (15m/30m)...'); await sleep(150); data = await fetchDataForAsset(asset); }
+        try { updateScan(22, 'Авто-подбор ТФ (1m–1h)...'); await sleep(150); data = await fetchDataForAsset(asset); }
         catch(e) {
             hideScan();
             alert('Ошибка данных: ' + e.message + '\n\nДобавьте Twelve Data ключи в настройках (⚙️)');
@@ -808,13 +846,18 @@ async function fetchDataForAsset(asset) {
         let confidence = Math.min(99, Math.round(absScore * 14 + 22));
         if (isAsianSession) confidence = Math.max(20, confidence - 10);
         if (news.hasNews) confidence = Math.min(confidence, 15);
-        let tradeMinutes = bestTf === '30min' ? 25 : 15;
-        if (adxData.adx > 35) tradeMinutes = Math.max(tradeMinutes, 22);
-        if (adxData.adx > 45) tradeMinutes = 30;
-        if (stochRsi < 20 || stochRsi > 80) tradeMinutes = Math.max(15, Math.round(tradeMinutes * 0.75));
-        if (atrPct > 2) tradeMinutes = Math.max(15, tradeMinutes - 3);
-        if (atrPct < 0.3) tradeMinutes = Math.min(30, tradeMinutes + 5);
-        tradeMinutes = Math.max(15, Math.min(30, tradeMinutes));
+        let tradeMinutes;
+        if (bestTf === '1min') tradeMinutes = 5;
+        else if (bestTf === '5min') tradeMinutes = 10;
+        else if (bestTf === '15min') tradeMinutes = 15;
+        else if (bestTf === '30min') tradeMinutes = 30;
+        else tradeMinutes = 45;
+        if (adxData.adx > 35) tradeMinutes = Math.round(tradeMinutes * 1.3);
+        if (adxData.adx > 45) tradeMinutes = Math.round(tradeMinutes * 1.5);
+        if (stochRsi < 20 || stochRsi > 80) tradeMinutes = Math.round(tradeMinutes * 0.8);
+        if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.85);
+        if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.15);
+        tradeMinutes = Math.max(3, Math.min(60, tradeMinutes));
         let sltpHtml = '';
         if (dir !== 'WAIT') {
             const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
@@ -834,9 +877,10 @@ async function fetchDataForAsset(asset) {
                 sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b><br><span class="sl">🛡 Стоп: -$' + lossUsd.toFixed(2) + '</span> | <span class="tp">💰 Тейк: +$' + profitUsd.toFixed(2) + '</span>';
             }
         }
+        const tfLabel = bestTf === '1h' ? '1H' : (bestTf === '30min' ? '30M' : (bestTf === '15min' ? '15M' : (bestTf === '5min' ? '5M' : '1M')));
         const timeMessage = (dir !== 'WAIT') ? '<br>⏱ Время сделки: <span class="conf">' + tradeMinutes + ' мин</span>' : '';
         updateScan(100, 'Готово!'); await sleep(400); hideScan();
-        document.getElementById('aiText').innerHTML = '<b>ТФ: ' + (bestTf === '30min' ? '30M' : '15M') + '</b> · <span class="conf">Уверенность: ' + confidence + '%</span><br>' + reasons.join('<br>') + sltpHtml + timeMessage;
+        document.getElementById('aiText').innerHTML = '<b>ТФ: ' + tfLabel + '</b> · <span class="conf">Уверенность: ' + confidence + '%</span><br>' + reasons.join('<br>') + sltpHtml + timeMessage;
         document.getElementById('aiBox').style.display = 'block';
         const actEl = document.getElementById('signalAction');
         actEl.textContent = dir === 'UP' ? 'ВВЕРХ (CALL)' : (dir === 'DOWN' ? 'ВНИЗ (PUT)' : (news.hasNews ? 'НОВОСТИ' : 'ОЖИДАНИЕ'));
@@ -845,11 +889,11 @@ async function fetchDataForAsset(asset) {
             playAlert();
             document.getElementById('timeBox').style.display = 'block';
             document.getElementById('tradeTimeValue').textContent = tradeMinutes + ' МИН';
-            document.getElementById('tradeTfValue').textContent = 'ТФ: ' + (bestTf === '30min' ? '30M' : '15M');
+            document.getElementById('tradeTfValue').textContent = 'ТФ: ' + tfLabel;
         }
         if (news.hasNews) { document.getElementById('warningBox').textContent = news.message; document.getElementById('warningBox').style.display = 'block'; }
         document.getElementById('signalBox').style.display = 'block';
-        lastAnalysisContext = 'Сигнал: ' + dir + '. Уверенность: ' + confidence + '%. Цена: ' + last.toFixed(asset.dec) + '. ТФ: ' + (bestTf === '30min' ? '30M' : '15M') + '.\n    RSI=' + rsi.toFixed(1) + ', StochRSI=' + stochRsi.toFixed(1) + ', MACD=' + (macd.histogram > 0 ? 'бычий' : 'медвежий') + ', ADX=' + adxData.adx.toFixed(1) + ', ATR=' + atrPct.toFixed(2) + '%.\n    Причины: ' + reasons.join('; ') + '.\n    Держать: ' + tradeMinutes + ' минут.';
+        lastAnalysisContext = 'Сигнал: ' + dir + '. Уверенность: ' + confidence + '%. Цена: ' + last.toFixed(asset.dec) + '. ТФ: ' + tfLabel + '.\n    RSI=' + rsi.toFixed(1) + ', StochRSI=' + stochRsi.toFixed(1) + ', MACD=' + (macd.histogram > 0 ? 'бычий' : 'медвежий') + ', ADX=' + adxData.adx.toFixed(1) + ', ATR=' + atrPct.toFixed(2) + '%.\n    Причины: ' + reasons.join('; ') + '.\n    Держать: ' + tradeMinutes + ' минут.';
         if (isChartOpen) addChatMessage('⚡ Анализ ' + asset.name + ' готов. Спрашивай!', 'system');
         updateRisk();
     } finally {
@@ -1053,7 +1097,8 @@ async function checkAutoSignal() {
             if (dir === lastAutoSignalDir && (now - lastAutoSignalTime) < 15 * 60 * 1000) return;
             lastAutoSignalDir = dir; lastAutoSignalTime = now;
             playAlert();
-            new Notification('Tuchkov AI: ' + asset.name + ' (' + (tf === '30min' ? '30M' : '15M') + ')', { body: 'Сигнал: ' + dir });
+            const tfLabel = tf === '1h' ? '1H' : (tf === '30min' ? '30M' : (tf === '15min' ? '15M' : (tf === '5min' ? '5M' : '1M')));
+            new Notification('Tuchkov AI: ' + asset.name + ' (' + tfLabel + ')', { body: 'Сигнал: ' + dir });
         } else { lastAutoSignalDir = null; }
     } catch(e) {}
 }
@@ -1184,6 +1229,7 @@ function renderScannerResults() {
         const icon = getAssetIcon(r.key);
         const priceStr = r.last ? r.last.toFixed(r.asset.dec) : (r.reason || '—');
         const confPct = Math.round(r.confidence || 0);
+        const tfShort = r.tf === '1h' ? '1H' : (r.tf === '30min' ? '30M' : (r.tf === '15min' ? '15M' : (r.tf === '5min' ? '5M' : '1M')));
         if (r.dir === 'CLOSED') {
             return '<div class="scan-card closed" style="animation-delay:' + (i*0.03) + 's;"><div class="scan-card-head"><div class="scan-card-icon">' + icon + '</div><div class="scan-card-name"><div class="p">' + r.asset.name + '</div><div class="pr">' + priceStr + '</div></div></div><div class="scan-card-tag">' + dirLabel + '</div></div>';
         }
@@ -1192,7 +1238,7 @@ function renderScannerResults() {
             html += '<div class="scan-confidence"><div class="scan-confidence-row"><span>Уверенность</span><b>' + confPct + '%</b></div><div class="scan-confidence-bar"><div class="scan-confidence-fill" style="width:' + confPct + '%"></div></div></div>';
         }
         if ((r.rsi || 0) || (r.adx || 0)) {
-            html += '<div class="scan-card-meta"><span>RSI ' + (r.rsi || 0).toFixed(0) + '</span><span>ADX ' + (r.adx || 0).toFixed(0) + '</span><span>' + (r.tf === '30min' ? '30M' : '15M') + '</span></div>';
+            html += '<div class="scan-card-meta"><span>RSI ' + (r.rsi || 0).toFixed(0) + '</span><span>ADX ' + (r.adx || 0).toFixed(0) + '</span><span>' + tfShort + '</span></div>';
         }
         return html + '</div>';
     }).join('');
@@ -1210,6 +1256,15 @@ window.addEventListener('load', function() {
     try { updateRisk(); } catch(e) {}
     try { calculateWinrate(); } catch(e) {}
     try { changePair(); } catch(e) {}
+});
+
+window.addEventListener('resize', function() {
+    if (isChartOpen && !document.getElementById('tvIframe').src.includes('about:blank')) {
+        clearTimeout(window._tvResize);
+        window._tvResize = setTimeout(function() {
+            try { loadTradingView(); } catch(e) {}
+        }, 400);
+    }
 });
 </script>
 </body>
