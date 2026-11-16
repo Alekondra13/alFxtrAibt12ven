@@ -150,25 +150,44 @@
     .scan-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple), var(--green)); border-radius: 3px; transition: width 0.4s ease; }
     .scan-percent { font-size: 14px; font-weight: 700; color: var(--accent); }
 
-    #chartOverlay { position: fixed; inset: 0; background: #050505; z-index: 10002; display: none; flex-direction: column; }
+    /* === ОБНОВЛЕНО: Фон на вкладке графика как на главной === */
+    #chartOverlay { position: fixed; inset: 0; z-index: 10002; display: none; flex-direction: column; background: #050505; }
+    #chartOverlay::before {
+        content: ''; position: fixed; inset: -30px;
+        background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=70&auto=format&fit=crop');
+        background-size: cover; background-position: center;
+        filter: blur(8px) brightness(0.42) saturate(0.9);
+        z-index: -2; pointer-events: none;
+    }
+    #chartOverlay::after {
+        content: ''; position: fixed; inset: 0;
+        background-image:
+            radial-gradient(circle at 10% 10%, rgba(10, 132, 255, 0.1) 0%, transparent 40%),
+            radial-gradient(circle at 90% 90%, rgba(48, 209, 88, 0.07) 0%, transparent 40%);
+        z-index: -1; pointer-events: none;
+    }
     #chartOverlay.active { display: flex; }
-    .chart-header-bar { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; background: rgba(24, 24, 26, 0.95); border-bottom: 1px solid var(--border); z-index: 10; }
+    .chart-header-bar { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; background: rgba(24, 24, 26, 0.55); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border-bottom: 1px solid var(--border); z-index: 10; }
     .chart-header-bar h3 { font-size: 16px; font-weight: 700; color: #fff; margin: 0; }
     .chart-close-btn { background: rgba(255, 69, 58, 0.15); color: var(--red); border: 1px solid rgba(255, 69, 58, 0.3); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; }
     .chart-close-btn:active { background: rgba(255, 69, 58, 0.3); transform: scale(0.95); }
     .chart-split-layout { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .chart-pane { flex: 1; width: 100%; background: #000; position: relative; }
     .chart-pane iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-    .ai-pane { flex: 1; width: 100%; background: var(--bg); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
+    .ai-pane { flex: 1; width: 100%; background: rgba(5, 5, 5, 0.55); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
     .chat-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
     .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
     .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
     .chat-msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-    .chat-msg.ai { background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.3); color: #e2e2e2; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-msg.ai { background: rgba(191, 90, 242, 0.18); border: 1px solid rgba(191, 90, 242, 0.35); color: #e2e2e2; align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .chat-msg.system { background: rgba(255,255,255,0.05); color: var(--text-dim); font-size: 11px; text-align: center; align-self: center; padding: 4px 10px; border-radius: 10px; }
     .chat-input-area { display: flex; gap: 8px; margin-top: 10px; flex-shrink: 0; }
     .chat-input-area input { flex: 1; padding: 12px 14px; font-size: 14px; border-radius: 14px; }
     .chat-input-area button { background: var(--accent); color: #fff; border: none; border-radius: 14px; width: 48px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .quick-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .quick-chips::-webkit-scrollbar { display: none; }
+    .chip { background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.35); color: #d9b3f5; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit; transition: 0.2s; }
+    .chip:active { transform: scale(0.95); background: rgba(191, 90, 242, 0.3); }
     @media (min-width: 768px) {
         .chart-split-layout { flex-direction: row; }
         .chart-pane { flex: 2; }
@@ -348,7 +367,15 @@
         <div class="ai-pane">
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessages">
-                    <div class="chat-msg ai">Привет! Я твой ИИ-помощник по трейдингу. Спроси меня о текущей ситуации, стратегиях или попроси проанализировать рынок.</div>
+                    <div class="chat-msg ai">Привет! Я твой персональный трейдинг-наставник 🧠<br><br>Спрашивай что угодно:<br>• Про сигналы и индикаторы<br>• Про стратегии (скальпинг, свинг, дейтрейдинг)<br>• Про управление риском<br>• Про психологию трейдинга<br>• Про конкретные пары и новости<br><br>Отвечаю по делу, без воды. Погнали! 🚀</div>
+                </div>
+                <div class="quick-chips" id="quickChips">
+                    <button class="chip" onclick="quickAsk('Что такое RSI и как его использовать?')">📊 Что такое RSI?</button>
+                    <button class="chip" onclick="quickAsk('Как правильно ставить стоп-лосс?')">🛡 Стоп-лосс</button>
+                    <button class="chip" onclick="quickAsk('Что такое дивергенция?')">🔍 Дивергенция</button>
+                    <button class="chip" onclick="quickAsk('Дай 5 правил риск-менеджмента')">⚠️ Риск-менеджмент</button>
+                    <button class="chip" onclick="quickAsk('Как торговать на новостях?')">📰 Новости</button>
+                    <button class="chip" onclick="quickAsk('Что такое ADX и зачем он нужен?')">🔥 ADX</button>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="chatInput" placeholder="Спросите ИИ..." onkeypress="handleChatEnter(event)">
@@ -718,6 +745,12 @@ function updateRisk() {
 
 function handleChatEnter(e) { if (e.key === 'Enter') sendChatMessage(); }
 
+function quickAsk(text) {
+    const input = document.getElementById('chatInput');
+    input.value = text;
+    sendChatMessage();
+}
+
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
@@ -725,7 +758,7 @@ async function sendChatMessage() {
     input.value = '';
     addChatMessage(text, 'user');
     chatHistory.push({ role: 'user', content: text });
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+    if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
     await askAI();
 }
 
@@ -738,13 +771,14 @@ function addChatMessage(text, type) {
     container.scrollTop = container.scrollHeight;
 }
 
+// === ОБНОВЛЕНО: мега-умный ИИ-агент ===
 async function askAI() {
     isAiTyping = true;
     const container = document.getElementById('chatMessages');
     const typingMsg = document.createElement('div');
     typingMsg.className = 'chat-msg ai';
     typingMsg.id = 'aiTyping';
-    typingMsg.textContent = 'ИИ анализирует данные...';
+    typingMsg.textContent = '🧠 Думаю...';
     container.appendChild(typingMsg);
     container.scrollTop = container.scrollHeight;
 
@@ -752,22 +786,111 @@ async function askAI() {
     const asset = ASSETS[key];
     const balance = document.getElementById('balanceInput').value;
     const lot = document.getElementById('autoLotValue').textContent;
-    
-    let sysPrompt = `Ты — профессиональный трейдер (квант) и ИИ-помощник в терминале Tuchkov AI. 
-    Твоя задача: анализировать предоставленные технические данные, объяснять сигналы и давать четкие торговые рекомендации. 
-    Отвечай ТОЛЬКО на русском языке. Будь краток, структурен, без воды. Не используй сложный жаргон без пояснений.
+    const trend = document.getElementById('statTrend').textContent;
+    const price = document.getElementById('statPrice').textContent;
 
-    ТЕКУЩИЕ НАСТРОЙКИ:
-    - Инструмент: ${asset.name} (${asset.type === 'forex' ? 'Форекс' : 'Криптовалюта'})
-    - Баланс счёта: $${balance}
-    - Рекомендуемый лот бота: ${lot}
-    `;
+    let sysPrompt = `Ты — элитный трейдер-квант с 15-летним опытом работы на форексе, криптовалютах, металлах и бинарных опционах. Ты работаешь в терминале Tuchkov AI как персональный трейдинг-наставник. Твоя цель — давать максимально полезные, конкретные и понятные ответы на ЛЮБЫЕ вопросы о трейдинге.
+
+📚 ТВОИ ГЛУБОКИЕ ЗНАНИЯ:
+
+ТЕХНИЧЕСКИЙ АНАЛИЗ:
+- Свечные паттерны: доджи, молот, падающая звезда, бычье/медвежье поглощение, пинцет, харами, утренняя/вечерняя звезда, три солдата, три вороны, марубозу
+- Графические паттерны: голова и плечи, двойная/тройная вершина/дно, треугольники (восходящий, нисходящий, симметричный), флаг, вымпел, клин, чашка с ручкой, вымпел, pennant
+- Уровни: поддержка, сопротивление, пробой, ложный пробой, ретест, зоны S/R, round numbers
+- Тренды: линии тренда, каналы, веера, трендовая структура HH/HL/LH/LL
+- Fibonacci: коррекции (23.6%, 38.2%, 50%, 61.8%, 78.6%), расширения, веера, временные зоны
+- Elliott Waves: импульс (5 волн), коррекция (3 волны ABC), правила и исключения
+- Volume Profile: POC, VAH, VAL, HVN, LVN
+
+ИНДИКАТОРЫ:
+- Трендовые: EMA (9/21/50/100/200), SMA, WMA, VWMA, Ichimoku, Parabolic SAR, Supertrend
+- Осцилляторы: RSI (дивергенции, перепроданность/перекупленность, уровни 30/70/50), Stochastic, StochRSI, CCI, Williams %R, Momentum
+- MACD: сигнальная линия, гистограмма, дивергенции, кроссоверы
+- Bollinger Bands: сжатие, расширение, пробой, отскок от полос, walking the bands
+- ADX: сила тренда (>25 сильный, <20 слабый), +DI/-DI
+- ATR: волатильность, для расчёта стопа
+- OBV, Volume, VWAP
+- Комбинации: RSI+MACD дивергенция, BB+RSI, EMA cross + ADX
+
+УПРАВЛЕНИЕ РИСКОМ:
+- Правило 1-2% риска на сделку
+- Risk/Reward минимум 1:2, лучше 1:3
+- Позиционирование по ATR
+- Диверсификация
+- Kelly Criterion
+- Максимальная просадка
+- Статистика: winrate, profit factor, ожидание
+- Пирамидинг и усреднение (когда можно, когда нельзя)
+
+ПСИХОЛОГИЯ:
+- FOMO, тильт, страх, жадность
+- Дисциплина, журнал сделок
+- Как пережить серию убытков
+- Психология толпы
+- Осознанность и контроль эмоций
+
+СТРАТЕГИИ:
+- Скальпинг (M1-M5): особенности, пары, время
+- Дейтрейдинг (M15-H1)
+- Свинг (H4-D1)
+- Позиционная (W1-MN)
+- Трендовая, контртрендовая, пробойная
+- Smart Money Concepts (SMC): order blocks, FVG, liquidity, BOS/CHoCH
+- ICT concepts: killzones, judas swing, silver bullet
+- Price Action, Order Flow
+
+ФУНДАМЕНТ:
+- ФРС: ставки, QE, QT, пауэлл-паузы
+- Экономические данные: NFP, CPI, PPI, GDP, PMI, PCE, розничные продажи, безработица
+- Влияние новостей на пары
+- Корреляции: EUR/USD ↔ DXY, золото ↔ USD, крипта ↔ риск-аппетит
+- Сессии: азиатская (слабая), лондонская (волатильная), нью-йоркская (мощная), оверлап
+
+КРИПТА:
+- Блокчейн, газ, комиссии
+- Халвинг BTC (2012, 2016, 2020, 2024)
+- On-chain: MVRV, SOPR, NUPL, funding rate, open interest, liquidations
+- Альтсезоны, доминация BTC
+- DeFi, стейблкоины, DEX
+- Мемкоины: риски и возможности
+
+ФОРЕКС:
+- Пипсы, лоты, кредитное плечо, маржа
+- Свопы, спреды
+- Мажоры, миноры, экзотика
+- Central banks: ФРС, ЕЦБ, BoE, BoJ, SNB, RBA, BoC
+- Кэрри-трейд
+
+БИНАРНЫЕ ОПЦИОНЫ:
+- Экспирация: 1m, 5m, 15m, 1h, 4h, 1d
+- Статистика: нужен winrate >55% при выплате 80%
+- Волатильность и время
+
+⚠️ ПРАВИЛА ОТВЕТА:
+1. Отвечай ТОЛЬКО на русском
+2. Будь конкретным — цифры, примеры, объяснения. БЕЗ ВОДЫ.
+3. Используй эмодзи для структуры: 📈 📉 ⚠️ 💡 🎯 ✅ ❌ 🔥 🛡️
+4. Разбивай длинные ответы на пункты (•) или шаги (1, 2, 3)
+5. Для новичков — простым языком, для опытных — профессионально
+6. Если спрашивают про текущий сигнал — используй данные анализа ниже
+7. Напоминай про риски, но НЕ ОТКАЗЫВАЙСЯ отвечать
+8. Не давай финансовых гарантий, но можешь давать ТОРГОВЫЕ рекомендации
+9. Если вопрос не про трейдинг — мягко верни к теме, но ответь кратко
+10. Максимум пользы за минимум слов
+
+📊 ТЕКУЩИЙ КОНТЕКСТ:
+• Инструмент: ${asset.name} (${asset.type === 'forex' ? 'Форекс' : (asset.td === 'XAU/USD' ? 'Металл' : 'Криптовалюта')})
+• Текущая цена: ${price}
+• Тренд (24ч): ${trend}
+• Баланс счёта: $${balance}
+• Рекомендуемый лот бота: ${lot}
+• Риск на сделку: ${getRiskPercent(parseFloat(balance)||0)}%
+`;
 
     if (lastAnalysisContext) {
-        sysPrompt += `\nПОСЛЕДНИЙ АНАЛИЗ БОТА (используй эти данные для ответа):
-        ${lastAnalysisContext}`;
+        sysPrompt += `\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ БОТА (используй для ответов на вопросы про сигнал):\n${lastAnalysisContext}`;
     } else {
-        sysPrompt += `\nВНИМАНИЕ: Пользователь ещё не запускал технический анализ для этой пары. Если он спрашивает про сигнал, скажи, что нужно нажать кнопку "Запустить ИИ" для получения точных данных.`;
+        sysPrompt += `\n\n⚠️ Пользователь ещё не запускал технический анализ для этой пары. Если спрашивает про сигнал — скажи нажать "⚡ ЗАПУСТИТЬ ИИ" для точных данных. Но на общие вопросы о трейдинге отвечай всегда.`;
     }
 
     try {
@@ -776,22 +899,24 @@ async function askAI() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 model: "openai",
-                messages: [{ role: "system", content: sysPrompt }, ...chatHistory]
+                messages: [{ role: "system", content: sysPrompt }, ...chatHistory],
+                temperature: 0.7,
+                max_tokens: 800
             })
         });
-        if (!res.ok) throw new Error('API error');
+        if (!res.ok) throw new Error('API error ' + res.status);
         const data = await res.json();
         const reply = data.choices[0].message.content;
         
         chatHistory.push({ role: 'assistant', content: reply });
-        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+        if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
         
         const typingEl = document.getElementById('aiTyping');
         if (typingEl) typingEl.remove();
         addChatMessage(reply, 'ai');
     } catch(e) {
         const typingEl = document.getElementById('aiTyping');
-        if (typingEl) typingEl.textContent = 'Ошибка соединения с ИИ. Проверьте интернет.';
+        if (typingEl) typingEl.textContent = '⚠️ Ошибка соединения. Проверьте интернет и попробуйте ещё раз.';
     } finally {
         isAiTyping = false;
     }
@@ -1089,12 +1214,22 @@ async function analyzeMarket() {
     let confidence = Math.min(99, Math.round(absScore * 14 + 22));
     if (isAsianSession) confidence = Math.max(20, confidence - 10);
 
-    let tradeMinutes = 15;
-    if (bestTf === '1h') tradeMinutes = 60;
-    else if (bestTf === '4h') tradeMinutes = 240;
-    else if (bestTf === '1d') tradeMinutes = 1440;
+    let tradeMinutes;
+    if (asset.type === 'crypto') {
+        tradeMinutes = 10;
+        if (bestTf === '1h') tradeMinutes = 20;
+        else if (bestTf === '4h') tradeMinutes = 30;
+        if (adxData.adx > 35) tradeMinutes = Math.round(tradeMinutes * 1.5);
+        tradeMinutes = Math.min(tradeMinutes, 45);
+    } else {
+        tradeMinutes = 15;
+        if (bestTf === '1h') tradeMinutes = 30;
+        else if (bestTf === '4h') tradeMinutes = 60;
+        if (adxData.adx > 35) tradeMinutes *= 2;
+        tradeMinutes = Math.min(tradeMinutes, 90);
+    }
+
     if (stochRsi < 20 || stochRsi > 80) tradeMinutes = Math.max(5, Math.round(tradeMinutes * 0.33));
-    if (adxData.adx > 35) tradeMinutes *= 2;
     if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.7);
     if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.3);
 
@@ -1158,6 +1293,9 @@ async function analyzeMarket() {
     
     lastAnalysisContext = `Сигнал: ${dir}. Уверенность: ${confidence}%. Цена входа: ${last.toFixed(asset.dec)}. Таймфрейм: ${bestTf.toUpperCase()}.
     Технические индикаторы: RSI=${rsi.toFixed(1)}, StochRSI=${stochRsi.toFixed(1)}, MACD=${macd.histogram > 0 ? 'бычий' : 'медвежий'}, ADX=${adxData.adx.toFixed(1)} (сила тренда), ATR=${atrPct.toFixed(2)}% (волатильность).
+    EMA9=${ema9[ema9.length-1].toFixed(asset.dec)}, EMA21=${ema21[ema21.length-1].toFixed(asset.dec)}, EMA50=${ema50.length ? ema50[ema50.length-1].toFixed(asset.dec) : 'N/A'}.
+    Bollinger Bands: upper=${bb.upper.toFixed(asset.dec)}, lower=${bb.lower.toFixed(asset.dec)}.
+    ${pattern ? 'Паттерн: ' + pattern + '.' : ''}
     Причины сигнала: ${reasons.join('; ')}.
     Рекомендация бота: держать сделку ${tradeMinutes} минут.`;
 
