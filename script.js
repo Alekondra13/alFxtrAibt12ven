@@ -1,8 +1,3 @@
-/* ============================================================
-   TUCHKOV AI TERMINAL — script.js — Часть 1/3
-   Логин · Шифрование ключей · Настройки · Два замка · Риск
-   ============================================================ */
-
 (function() {
     const d = "alekondra13.github.io";
     const h = window.location.hostname;
@@ -12,7 +7,6 @@
     }
 })();
 
-/* ПАРОЛЬ (обфусцирован) */
 function _0x4a2f() {
     var _x = document.getElementById('p_in').value;
     var _k = (function(){
@@ -35,9 +29,6 @@ function _0x4a2f() {
     else { alert('Ошибка доступа'); }
 }
 
-/* ============================================================
-   ШИФРОВАНИЕ LOCALSTORAGE (XOR + base64)
-   ============================================================ */
 const _SALT = 'tuchkov_ai_terminal_2024_v1';
 
 function encryptStr(txt) {
@@ -84,9 +75,6 @@ function setEncJson(k, arr) {
     safeSet(k, encryptStr(JSON.stringify(arr)));
 }
 
-/* ============================================================
-   КОНФИГ
-   ============================================================ */
 const ASSETS = {
     EURUSD: { tvSym: 'FX:EURUSD', type:'forex', base:'EUR', quote:'USD', pip:0.0001, pipVal:10, dec:4, name:'EUR/USD', td:'EUR/USD' },
     GBPUSD: { tvSym: 'FX:GBPUSD', type:'forex', base:'GBP', quote:'USD', pip:0.0001, pipVal:10, dec:4, name:'GBP/USD', td:'GBP/USD' },
@@ -117,20 +105,13 @@ let scannerResults = [];
 let scannerFilter = 'all';
 let tfCache = {};
 let audioCtx = null;
-let currentAiKeyIndex = 0;
 let currentKeyIndex = 0;
 let newsCache = {};
 let newsCacheTime = 0;
+let lastIndicators = {};
 
-/* ============================================================
-   КЛЮЧИ (в localStorage зашифрованы)
-   ============================================================ */
 function getTwelveKeys() {
     const keys = getEncJson('twelve_api_keys');
-    return keys.filter(k => k && String(k).trim().length > 5);
-}
-function getAiKeys() {
-    const keys = getEncJson('ai_api_keys');
     return keys.filter(k => k && String(k).trim().length > 5);
 }
 
@@ -146,13 +127,13 @@ function updateKeyStatus() {
     }
 }
 
-/* Замок Twelve Data */
 function isKeysLocked() { return safeGet('keys_locked') === '1'; }
 function toggleKeysLock() {
     if (isKeysLocked()) {
         if (confirm('Разблокировать Twelve Data ключи?')) { safeSet('keys_locked', '0'); updateLockUI(); }
     } else { safeSet('keys_locked', '1'); updateLockUI(); }
 }
+
 function updateLockUI() {
     const locked = isKeysLocked();
     const btn = document.getElementById('lockBtn');
@@ -171,34 +152,6 @@ function updateLockUI() {
     if (hint) hint.style.display = locked ? 'block' : 'none';
 }
 
-/* Замок AI */
-function isAiKeysLocked() { return safeGet('ai_keys_locked') === '1'; }
-function toggleAiKeysLock() {
-    if (isAiKeysLocked()) {
-        if (confirm('Разблокировать AI ключи?')) { safeSet('ai_keys_locked', '0'); updateAiLockUI(); }
-    } else { safeSet('ai_keys_locked', '1'); updateAiLockUI(); }
-}
-function updateAiLockUI() {
-    const locked = isAiKeysLocked();
-    const btn = document.getElementById('aiLockBtn');
-    const inputs = document.querySelectorAll('#settingsModal input[id^="aiKeyInput"]');
-    const hint = document.getElementById('aiLockHint');
-    inputs.forEach(input => {
-        input.readOnly = locked;
-        input.style.opacity = locked ? '0.55' : '1';
-        input.style.cursor = locked ? 'not-allowed' : 'text';
-        input.style.background = locked ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.35)';
-    });
-    if (btn) {
-        btn.textContent = locked ? '🔒' : '🔓';
-        btn.style.background = locked ? 'rgba(255,159,10,0.2)' : 'rgba(48,209,88,0.2)';
-    }
-    if (hint) hint.style.display = locked ? 'block' : 'none';
-}
-
-/* ============================================================
-   НАСТРОЙКИ
-   ============================================================ */
 function openSettings() {
     try {
         const keys = getTwelveKeys();
@@ -206,40 +159,24 @@ function openSettings() {
             const el = document.getElementById('twelveKeyInput' + i);
             if (el) el.value = keys[i-1] || '';
         }
-        const aiKeys = getAiKeys();
-        for (let i = 1; i <= 5; i++) {
-            const el = document.getElementById('aiKeyInput' + i);
-            if (el) el.value = aiKeys[i-1] || '';
-        }
         updateKeyStatus();
         updateLockUI();
-        updateAiLockUI();
         document.getElementById('settingsModal').classList.add('active');
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
 
 function saveSettings() {
-    if (isKeysLocked() && isAiKeysLocked()) {
-        alert('🔒 Оба набора ключей заблокированы.');
+    if (isKeysLocked()) {
+        alert('🔒 Ключи заблокированы.');
         return;
     }
     try {
-        if (!isKeysLocked()) {
-            const keys = [];
-            for (let i = 1; i <= 5; i++) {
-                const val = (document.getElementById('twelveKeyInput' + i).value || '').trim();
-                if (val) keys.push(val);
-            }
-            setEncJson('twelve_api_keys', keys);
+        const keys = [];
+        for (let i = 1; i <= 5; i++) {
+            const val = (document.getElementById('twelveKeyInput' + i).value || '').trim();
+            if (val) keys.push(val);
         }
-        if (!isAiKeysLocked()) {
-            const aiKeys = [];
-            for (let i = 1; i <= 5; i++) {
-                const val = (document.getElementById('aiKeyInput' + i).value || '').trim();
-                if (val) aiKeys.push(val);
-            }
-            setEncJson('ai_api_keys', aiKeys);
-        }
+        setEncJson('twelve_api_keys', keys);
         tfCache = {};
         updateKeyStatus();
         closeModal('settingsModal');
@@ -248,9 +185,6 @@ function saveSettings() {
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
 
-/* ============================================================
-   TWELVE DATA API
-   ============================================================ */
 async function fetchTwelveData(endpoint, params, timeoutMs) {
     timeoutMs = timeoutMs || 12000;
     const keys = getTwelveKeys();
@@ -280,9 +214,6 @@ async function fetchTwelveData(endpoint, params, timeoutMs) {
     throw new Error('Ключи исчерпаны. ' + (lastError || ''));
 }
 
-/* ============================================================
-   СКАН-ОВЕРЛЕЙ + УТИЛИТЫ
-   ============================================================ */
 function showScan() {
     document.getElementById('scanOverlay').classList.add('active');
     updateScan(0, 'Инициализация...');
@@ -300,9 +231,6 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function openScanner() { document.getElementById('scannerModal').classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-/* ============================================================
-   РИСК / ЛОТ
-   ============================================================ */
 function getRiskPercent(b) { if (b <= 20) return 6.0; if (b <= 50) return 4.5; return 3.0; }
 
 function calcAutoLot(key, balance, price) {
@@ -356,9 +284,6 @@ function updateRisk() {
     }
 }
 
-/* ============================================================
-   ЧАТ
-   ============================================================ */
 function handleChatEnter(e) { if (e.key === 'Enter') sendChatMessage(); }
 function quickAsk(text) {
     document.getElementById('chatInput').value = text;
@@ -389,200 +314,198 @@ function addChatMessage(text, type) {
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
 }/* ============================================================
-   AI — определение endpoint + модели (ФИКС 404 GROQ)
-   ============================================================ */
-
-/* Модели под каждый endpoint — чтобы не было 404 */
-const AI_MODELS = {
-    groq: 'llama-3.3-70b-versatile',
-    openai: 'gpt-4o-mini',
-    openrouter: 'meta-llama/llama-3.1-8b-instruct:free',
-    deepseek: 'deepseek-chat',
-    mistral: 'mistral-small-latest',
-    generic: 'gpt-4o-mini'
-};
-
-/* Определяем endpoint + провайдера по префиксу ключа */
-function detectAiEndpoint(key) {
-    if (!key) return null;
-    if (key.startsWith('gsk_')) return { url: 'https://api.groq.com/openai/v1/chat/completions', provider: 'groq' };
-    if (key.startsWith('sk-or-')) return { url: 'https://openrouter.ai/api/v1/chat/completions', provider: 'openrouter' };
-    if (key.startsWith('sk-ant-')) return null;
-    if (key.startsWith('sk-')) return { url: 'https://api.openai.com/v1/chat/completions', provider: 'openai' };
-    if (key.startsWith('dsk_') || key.startsWith('sk-ds-')) return { url: 'https://api.deepseek.com/v1/chat/completions', provider: 'deepseek' };
-    return { url: 'https://api.openai.com/v1/chat/completions', provider: 'generic' };
-}
-
-/* Парсер строки ключа:
-   - "gsk_xxxx" → { url:auto, provider:groq, model:auto, key:"gsk_xxxx" }
-   - "URL|KEY" → { url, key, provider:generic, model:generic }
-   - "URL|KEY|MODEL" → { url, key, model }
-*/
-function parseAiKeyEntry(entry) {
-    if (!entry) return null;
-    entry = String(entry).trim();
-    if (entry.includes('|')) {
-        const parts = entry.split('|').map(s => s.trim());
-        const url = parts[0] || null;
-        const key = parts[1] || '';
-        const model = parts[2] || null;
-        if (!key) return null;
-        const provider = url
-            ? (url.includes('groq.com') ? 'groq'
-              : url.includes('openrouter') ? 'openrouter'
-              : url.includes('openai.com') ? 'openai'
-              : url.includes('deepseek') ? 'deepseek'
-              : url.includes('mistral') ? 'mistral'
-              : 'generic')
-            : 'generic';
-        return {
-            url: url || (detectAiEndpoint(key)?.url || ''),
-            key: key,
-            provider: provider,
-            model: model || AI_MODELS[provider] || AI_MODELS.generic
-        };
-    }
-    const detected = detectAiEndpoint(entry);
-    if (!detected) return null;
-    return {
-        url: detected.url,
-        key: entry,
-        provider: detected.provider,
-        model: AI_MODELS[detected.provider] || AI_MODELS.generic
-    };
-}
-
-/* Отправка одного запроса к AI */
-async function aiFetchChat(url, key, model, messages, timeoutMs) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs || 25000);
-    try {
-        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key };
-        /* OpenRouter требует Referer/Title — опционально, но помогает от 403 */
-        if (url.includes('openrouter')) {
-            headers['HTTP-Referer'] = location.origin || 'https://localhost';
-            headers['X-Title'] = 'Tuchkov AI Terminal';
-        }
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                model: model,
-                messages: messages,
-                temperature: 0.65,
-                max_tokens: 800
-            }),
-            signal: controller.signal
-        });
-        if (!res.ok) {
-            let bodySnippet = '';
-            try { const t = await res.text(); bodySnippet = t.substring(0, 140); } catch(e) {}
-            throw new Error('HTTP ' + res.status + (bodySnippet ? ' — ' + bodySnippet : ''));
-        }
-        const data = await res.json();
-        const content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-        if (!content || String(content).trim().length < 2) throw new Error('Пустой ответ');
-        return String(content).trim();
-    } finally { clearTimeout(timer); }
-}
-
-/* ============================================================
-   askAI — только твои 5 ключей + ротация
+   ЛОКАЛЬНЫЙ ИИ-АГЕНТ — на чистом алгоритме, без ключей
    ============================================================ */
 async function askAI() {
     if (isAiTyping) return;
-    const aiKeys = getAiKeys();
-    if (aiKeys.length === 0) {
-        addChatMessage('⚠️ AI ключи не установлены.\n\nОткрой ⚙️ Настройки → раздел «AI API» → вставь до 5 своих ключей → Сохранить.', 'ai');
-        return;
-    }
     isAiTyping = true;
     const container = document.getElementById('chatMessages');
     const typingMsg = document.createElement('div');
     typingMsg.className = 'chat-msg ai';
     typingMsg.id = 'aiTyping';
-    typingMsg.textContent = '🧠 Думаю...';
+    typingMsg.textContent = '🧠 Анализирую...';
     container.appendChild(typingMsg);
     container.scrollTop = container.scrollHeight;
     try {
-        const key = document.getElementById('pairSelect').value;
-        const asset = ASSETS[key];
-        const balance = document.getElementById('balanceInput').value || '—';
-        const lot = document.getElementById('autoLotValue').textContent;
-        const trend = document.getElementById('statTrend').textContent;
-        const price = document.getElementById('statPrice').textContent;
-        let sysPrompt =
-            'Ты — Tuchkov AI, элитный трейдер-наставник. Отвечай ТОЛЬКО на русском, конкретно, с цифрами и примерами. БЕЗ воды. Структурируй эмодзи: 📈📉⚠️💡🎯✅❌🔥🛡️.\n\n' +
-            'ЭКСПЕРТИЗА:\n' +
-            '• Теханализ: свечи, паттерны, уровни, тренды, Fibonacci, Elliott, Volume Profile, SMC/ICT.\n' +
-            '• Индикаторы: EMA, RSI, MACD, Bollinger, ADX, ATR, StochRSI, Ichimoku, PSAR, VWAP, OBV.\n' +
-            '• Риск-менеджмент: 1-2% на сделку, RR мин 1:2.\n' +
-            '• Психология: FOMO, тильт, страх, жадность, дисциплина.\n' +
-            '• Стратегии: скальпинг, дейтрейдинг, свинг, позиционка.\n' +
-            '• Фундамент: ФРС/ЕЦБ/BoE/BoJ, NFP/CPI/PPI/GDP/PMI.\n' +
-            '• Крипта: халвинги, on-chain, funding, OI, альтсезоны.\n' +
-            '• Форекс: пипсы, лоты, маржа, свопы, кэрри-трейд.\n\n' +
-            'ПРАВИЛА: 1. Только русский. 2. Конкретика. 3. Длинное — списком. 4. Про сигнал — ссылайся на данные ниже. 5. Напоминай про риски.\n\n' +
-            '📊 КАРТОЧКА:\n' +
-            '• Инструмент: ' + asset.name + '\n' +
-            '• Цена: ' + price + '\n' +
-            '• Тренд 24ч: ' + trend + '\n' +
-            '• Баланс: $' + balance + '\n' +
-            '• Лот: ' + lot;
-        if (lastAnalysisContext) {
-            sysPrompt += '\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ:\n' + lastAnalysisContext;
-        } else {
-            sysPrompt += '\n\n⚠️ Анализа ещё не было. Если спросят про сигнал — предложи нажать "⚡ ЗАПУСТИТЬ ИИ".';
-        }
-        const messages = [{ role: 'system', content: sysPrompt }].concat(chatHistory);
-
-        let reply = null;
-        let lastError = 'Все AI ключи исчерпаны';
-
-        for (let i = 0; i < aiKeys.length; i++) {
-            const idx = (currentAiKeyIndex + i) % aiKeys.length;
-            const entry = parseAiKeyEntry(aiKeys[idx]);
-            if (!entry || !entry.key || !entry.url) {
-                lastError = 'Ключ #' + (idx + 1) + ': не удалось распознать формат';
-                continue;
-            }
-            try {
-                const res = await aiFetchChat(entry.url, entry.key, entry.model, messages, 25000);
-                if (res && res.length > 2) {
-                    reply = res;
-                    currentAiKeyIndex = idx;
-                    break;
-                }
-            } catch(e) {
-                lastError = 'Ключ #' + (idx + 1) + ' (' + entry.provider + '): ' + e.message;
-            }
-        }
-
+        const q = (chatHistory[chatHistory.length - 1]?.content || '').toLowerCase();
+        await sleep(350 + Math.random() * 350);
+        const reply = buildLocalAnswer(q);
         const typingEl = document.getElementById('aiTyping');
         if (typingEl) typingEl.remove();
-        if (reply) {
-            chatHistory.push({ role: 'assistant', content: reply });
-            if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
-            addChatMessage(reply, 'ai');
-        } else {
-            addChatMessage(
-                '⚠️ Не удалось получить ответ.\nПричина: ' + lastError +
-                '\n\n💡 Проверь ключи в ⚙️ Настройки → «AI API».\nФорматы:\n' +
-                '• просто ключ (gsk_/sk-/sk-or-...)\n' +
-                '• URL|KEY\n' +
-                '• URL|KEY|MODEL',
-                'ai'
-            );
-        }
-    } catch (fatalError) {
-        const typingEl = document.getElementById('aiTyping');
-        if (typingEl) typingEl.remove();
-        addChatMessage('⚠️ Ошибка ИИ: ' + (fatalError.message || 'неизвестно'), 'ai');
+        addChatMessage(reply, 'ai');
+        chatHistory.push({ role: 'assistant', content: reply });
+        if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
     } finally {
         isAiTyping = false;
         const leftover = document.getElementById('aiTyping');
         if (leftover) leftover.remove();
     }
+}
+
+function buildLocalAnswer(q) {
+    const has = (...words) => words.some(w => q.includes(w));
+    const ind = lastIndicators || {};
+    const assetKey = document.getElementById('pairSelect').value;
+    const asset = ASSETS[assetKey];
+    const assetName = asset ? asset.name : '—';
+    const priceStr = document.getElementById('statPrice').textContent;
+    const balanceVal = parseFloat(document.getElementById('balanceInput').value) || 0;
+    const lotStr = document.getElementById('autoLotValue').textContent;
+    const fmt = (v, d) => (v === undefined || v === null || !isFinite(v)) ? '—' : Number(v).toFixed(d || 1);
+    const hasAnalysis = !!lastAnalysisContext;
+
+    if (has('привет', 'здравств', 'hello', 'помощь', 'help', 'что умеешь', 'что ты можешь', 'команды')) {
+        return '👋 Я — локальный ИИ-помощник Tuchkov AI.\n\nРаботаю на чистом алгоритме — без внешних сервисов и ключей. Отвечаю по индикаторам, риску, стратегиям и текущему анализу.\n\n📋 Что могу:\n• «Дай сигнал» / «Что по EUR/USD?» — разбор последнего анализа\n• «RSI», «MACD», «ADX», «ATR», «StochRSI», «Bollinger», «EMA»\n• «Дивергенция», «Паттерны», «Свечи»\n• «Стоп-лосс», «Тейк», «Риск», «Лот», «Баланс»\n• «Тренд», «Новости», «Сессии»\n• «Стратегия», «ТФ», «Время сделки»\n\n⚠️ Не финансовая рекомендация. Только образование и разбор ситуации.';
+    }
+
+    if (has('сигнал', 'сигналы', 'анализ', 'вход', 'сделк', 'прогноз', 'что по', 'покажи')) {
+        if (!hasAnalysis) {
+            return '⚠️ Анализа ещё не было.\n\nНажми «⚡ ЗАПУСТИТЬ ИИ» на главном экране — я рассчитаю индикаторы и дам сигнал, а потом смогу его подробно разобрать.';
+        }
+        let s = '📊 Сигнал по ' + assetName + '\n\n';
+        const dir = ind.dir || 'WAIT';
+        s += '🎯 Направление: ' + (dir === 'UP' ? '🟢 ВВЕРХ (CALL)' : dir === 'DOWN' ? '🔴 ВНИЗ (PUT)' : '⏸ ОЖИДАНИЕ') + '\n';
+        s += '💪 Уверенность: ' + (ind.confidence || 0) + '%\n';
+        s += '⏱ ТФ: ' + (ind.tf || '—') + ' · Держать: ' + (ind.tradeMinutes || '—') + ' мин\n';
+        s += '💰 Цена: ' + priceStr + '\n';
+        if (ind.slUsd !== undefined) {
+            s += '🛡 Стоп: -$' + fmt(ind.slUsd, 2) + ' · 💰 Тейк: +$' + fmt(ind.tpUsd, 2) + '\n';
+        }
+        s += '📦 Лот: ' + lotStr + (balanceVal > 0 ? ' (от $' + balanceVal.toFixed(2) + ')' : '') + '\n\n';
+        s += '📈 Индикаторы:\n';
+        s += '• RSI: ' + fmt(ind.rsi) + (ind.rsi < 30 ? ' (перепродан)' : ind.rsi > 70 ? ' (перекуплен)' : '') + '\n';
+        s += '• StochRSI: ' + fmt(ind.stochRsi) + '\n';
+        s += '• MACD: ' + (ind.macd > ind.macdSignal ? 'бычий' : 'медвежий') + '\n';
+        s += '• ADX: ' + fmt(ind.adx) + ' · +DI ' + fmt(ind.plusDI) + ' / -DI ' + fmt(ind.minusDI) + '\n';
+        s += '• ATR: ' + fmt(ind.atrPct, 2) + '%\n';
+        if (ind.pattern) s += '• Паттерн: ' + ind.pattern + '\n';
+        s += '\n⚠️ Не финансовая рекомендация.';
+        return s;
+    }
+
+    if (has('rsi', 'рси')) {
+        let s = '📊 RSI (Индекс относительной силы)\n\nИзмеряет скорость и силу движения цены, 0–100.\n';
+        s += '• <30 — перепродан (возможен отскок вверх)\n• >70 — перекуплен (возможен откат вниз)\n• 50 — нейтрально\n\n';
+        s += '📌 Один RSI не даёт сигнал — комбинируй с трендом (EMA) и MACD.\n📌 Дивергенция RSI + цены — сильный разворотный сигнал.';
+        if (ind.rsi !== undefined) {
+            s += '\n\n💡 Сейчас по ' + assetName + ': RSI = ' + fmt(ind.rsi) + ' — ' + (ind.rsi < 30 ? 'перепродан' : ind.rsi > 70 ? 'перекуплен' : 'нейтральная зона');
+        }
+        return s;
+    }
+
+    if (has('macd', 'макд')) {
+        let s = '📈 MACD\n\nТрендовый индикатор:\n• MACD-линия = EMA12 − EMA26\n• Сигнальная = EMA9 от MACD\n• Гистограмма = MACD − сигнальная\n\n';
+        s += '📌 Пересечение MACD выше сигнальной — бычий\n📌 Пересечение ниже — медвежий\n📌 Дивергенция с ценой — разворот';
+        if (ind.macd !== undefined) {
+            s += '\n\n💡 Сейчас: MACD ' + (ind.macd > ind.macdSignal ? 'бычий' : 'медвежий') + ', гистограмма = ' + fmt(ind.histogram, 3) + (ind.crossover ? ' · crossover ' + ind.crossover : '');
+        }
+        return s;
+    }
+
+    if (has('adx', 'сила тренда', 'сильный тренд', 'слабый тренд')) {
+        let s = '🔥 ADX (Average Directional Index)\n\nПоказывает СИЛУ тренда (0–100), но не направление.\n';
+        s += '• <20 — тренда нет (флэт)\n• 20–25 — зарождается\n• >25 — сильный тренд\n• >40 — очень сильный\n\n';
+        s += '📌 +DI > -DI — бычий тренд, +DI < -DI — медвежий.';
+        if (ind.adx !== undefined) {
+            s += '\n\n💡 Сейчас по ' + assetName + ':\n• ADX = ' + fmt(ind.adx) + ' (' + (ind.adx > 40 ? 'очень сильный' : ind.adx > 25 ? 'сильный' : ind.adx > 20 ? 'зарождается' : 'слабый') + ')\n';
+            s += '• +DI = ' + fmt(ind.plusDI) + ' · -DI = ' + fmt(ind.minusDI) + ' → ' + (ind.plusDI > ind.minusDI ? 'бычий' : 'медвежий');
+        }
+        return s;
+    }
+
+    if (has('atr', 'волатильн')) {
+        let s = '⚡ ATR (Average True Range)\n\nСредний истинный диапазон — мера волатильности.\n📌 Стоп ставится на 1.5–2 ATR.\n📌 Чем больше ATR, тем шире стоп.';
+        if (ind.atrPct !== undefined) {
+            s += '\n\n💡 Сейчас ATR = ' + fmt(ind.atrPct, 2) + '% от цены — ' + (ind.atrPct > 3 ? 'высокая волатильность' : ind.atrPct < 0.3 ? 'низкая волатильность' : 'умеренная');
+        }
+        return s;
+    }
+
+    if (has('stoch', 'стохаст')) {
+        let s = '⚡ StochRSI\n\nОсциллятор на базе RSI — чувствительнее.\n• <20 перепродан\n• >80 перекуплен\n📌 Хорош для точных входов на 1m–15m.';
+        if (ind.stochRsi !== undefined) {
+            s += '\n\n💡 Сейчас StochRSI = ' + fmt(ind.stochRsi) + ' — ' + (ind.stochRsi < 20 ? 'перепродан' : ind.stochRsi > 80 ? 'перекуплен' : 'нейтрально');
+        }
+        return s;
+    }
+
+    if (has('bollinger', 'боллинджер', 'полос')) {
+        let s = '📉 Полосы Боллинджера\n\n3 линии: SMA20 ± 2σ.\n📌 Цена у верхней — откат вниз\n📌 Цена у нижней — отскок вверх\n📌 Сужение полос — накопление, скоро пробой';
+        if (ind.bbUpper !== undefined) {
+            s += '\n\n💡 Сейчас: цена ' + priceStr + ', верхняя ' + fmt(ind.bbUpper, 4) + ', нижняя ' + fmt(ind.bbLower, 4);
+        }
+        return s;
+    }
+
+    if (has('ema', 'машк', 'тренд', 'средние')) {
+        let s = '📈 EMA (экспоненциальные скользящие)\n\n📌 9/21/50 — классика\n📌 9>21>50 — сильный бычий\n📌 9<21<50 — сильный медвежий\n📌 Цена выше EMA200 — глобально бычий рынок';
+        if (ind.ema9 !== undefined) {
+            s += '\n\n💡 Сейчас по ' + assetName + ':\n• EMA9 = ' + fmt(ind.ema9, 4) + '\n• EMA21 = ' + fmt(ind.ema21, 4) + '\n• EMA50 = ' + fmt(ind.ema50, 4);
+        }
+        return s;
+    }
+
+    if (has('диверген', 'divergen')) {
+        return '🔍 Дивергенция\n\nРасхождение между ценой и индикатором (чаще RSI/MACD).\n\n📌 Бычья:\n• цена делает новый минимум\n• индикатор — более высокий\n• → возможен разворот вверх\n\n📌 Медвежья:\n• цена делает новый максимум\n• индикатор — более низкий\n• → возможен разворот вниз\n\n📌 Лучше работает на ТФ 1h+. На 1m много ложных.\n📌 Подтверждай объёмом и пробоем уровня.';
+    }
+
+    if (has('стоп', 'stop', 'стоп-лосс', 'sl')) {
+        let s = '🛡 Стоп-лосс\n\nГлавное: стоп ставится ДО входа.\n\n📌 Как ставить:\n• За локальный экстремум\n• Или 1.5–2 ATR от входа\n• Не ближе 5–10 пипсов (шум снесёт)\n\n📌 Лот считается ОТ стопа:\nЛот = (Баланс × Риск%) / (SL в пунктах × Стоимость пункта)';
+        if (ind.slUsd !== undefined && balanceVal > 0) {
+            s += '\n\n💡 В сигнале: SL = -$' + fmt(ind.slUsd, 2) + ' = ' + ((ind.slUsd / balanceVal) * 100).toFixed(1) + '% от баланса';
+        }
+        return s;
+    }
+
+    if (has('тейк', 'take', 'tp', 'профит')) {
+        let s = '💰 Тейк-профит\n\n📌 Минимум RR 1:2 (на 1$ риска — 2$ прибыли)\n📌 Ставь перед уровнем, а не за ним\n📌 Можно частями: 50% на 1:1, остаток на 1:3+\n📌 Перед новостями — частично фиксируй';
+        if (ind.tpUsd !== undefined) {
+            s += '\n\n💡 В сигнале: TP = +$' + fmt(ind.tpUsd, 2);
+        }
+        return s;
+    }
+
+    if (has('риск', 'лот', 'баланс', 'депозит', 'капитал', 'мани-менедж')) {
+        let s = '⚠️ Риск-менеджмент\n\n📌 Золотые правила:\n• 1–2% на сделку (агрессивно 3–6%)\n• Не более 5–6% риска суммарно\n• RR минимум 1:2\n• 2 стопа подряд — пауза 30 мин\n• Никогда без стопа\n\n📌 Лот = (Баланс × Риск%) / (SL в пунктах × Стоимость пункта)';
+        if (balanceVal > 0) {
+            s += '\n\n💡 Твой баланс: $' + balanceVal.toFixed(2) + '\n💡 Лот: ' + lotStr;
+        } else {
+            s += '\n\n💡 Введи баланс на главном экране — рассчитаю лот и риск.';
+        }
+        return s;
+    }
+
+    if (has('новост', 'news', 'nfp', 'cpi', 'фрс', 'фомс', 'ставк')) {
+        return '📰 Новости\n\n📌 За 15–30 минут до важных новостей — НЕ входи\n📌 После — жди 5–10 минут стабилизации\n\n📌 Ключевые:\n• NFP — 1-я пятница, 15:30 МСК\n• CPI/PPI — инфляция, 15:30 МСК\n• FOMC — ставка ФРС, 21:00 МСК\n• ЕЦБ/BoE/BoJ\n\n📌 Волатильность в новости ×5–10. Стопы выносит.\n📌 Бот блокирует сигнал за 30 мин до новости по паре.';
+    }
+
+    if (has('сесси', 'время торговли', 'когда торговать')) {
+        return '🌏 Торговые сессии (МСК)\n\n📌 Азиатская: 03:00–12:00 — низкая вола, флэт\n📌 Европейская: 10:00–19:00 — средняя\n📌 Американская: 15:30–00:00 — высокая\n\n📌 Лучшие часы для входа: 10:00–13:00 и 16:30–19:00\n📌 Избегай 05:00–08:00 и пятницу после 20:00';
+    }
+
+    if (has('паттерн', 'свеч', 'поглощен', 'молот', 'звезд', 'дожи')) {
+        let s = '🕯️ Свечные паттерны\n\n📌 Бычьи:\n• Молот — длинная нижняя тень\n• Бычье поглощение\n• Утренняя звезда\n\n📌 Медвежьи:\n• Падающая звезда\n• Медвежье поглощение\n• Вечерняя звезда\n\n📌 Работают лучше на ключевых уровнях + старших ТФ.';
+        if (ind.pattern) {
+            s += '\n\n💡 Сейчас: ' + ind.pattern;
+        } else {
+            s += '\n\n💡 Сейчас чёткого паттерна нет.';
+        }
+        return s;
+    }
+
+    if (has('стратег', 'как торговать', 'с чего начать', 'скальп', 'свинг', 'дейтрейд')) {
+        return '🎯 Стратегии\n\n📌 Скальпинг (1m–5m):\n• Держать 1–10 мин\n• 5–15 сделок в день\n• Требует дисциплины\n• Комиссии съедают\n\n📌 Дейтрейдинг (15m–1h):\n• Держать 30 мин – часы\n• 1–3 сделки в день\n• Оптимально для старта\n\n📌 Свинг (4h–1D):\n• Держать дни-недели\n• 1–3 сделки в неделю\n\n📌 Начни с 15m — золотая середина.';
+    }
+
+    if (has('тф', 'таймфрейм', 'timeframe', 'время сделки', 'сколько держать')) {
+        let s = '⏱ Таймфреймы\n\n📌 1m — скальпинг, 3–10 мин\n📌 5m — скальпинг, 5–15 мин\n📌 15m — дейтрейдинг, 15–30 мин\n📌 30m — дейтрейдинг, 30–60 мин\n📌 1h — дейтрейдинг/свинг, 1–4 часа\n\n📌 Бот подбирает ТФ по силе тренда (ADX).';
+        if (ind.tf) {
+            s += '\n\n💡 Сейчас: ТФ ' + ind.tf + ' · Держать ' + (ind.tradeMinutes || '—') + ' мин';
+        }
+        return s;
+    }
+
+    return '🤔 Не понял вопрос.\n\nЯ работаю на локальном алгоритме — без внешних AI. Отвечаю только по трейдингу и текущему анализу.\n\n📋 Попробуй:\n• «Дай сигнал»\n• «RSI» / «MACD» / «ADX» / «ATR» / «StochRSI» / «Bollinger»\n• «Стоп-лосс» / «Тейк» / «Риск» / «Лот»\n• «Дивергенция» / «Паттерны» / «Свечи»\n• «Тренд» / «EMA» / «Новости» / «Сессии»\n• «Стратегия» / «ТФ»\n• «Помощь» — список тем\n\n⚠️ Не финансовая рекомендация.';
 }
 
 /* ============================================================
@@ -679,7 +602,6 @@ function isMarketOpen(asset) {
     const day = now.getUTCDay();
     const timeInMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
     const year = now.getUTCFullYear();
-    /* US DST: 2-е воскресенье марта — 1-е воскресенье ноября */
     const marchSecondSunday = new Date(Date.UTC(year, 2, 8 + ((7 - new Date(Date.UTC(year, 2, 8)).getUTCDay()) % 7)));
     const novFirstSunday = new Date(Date.UTC(year, 10, 1 + ((7 - new Date(Date.UTC(year, 10, 1)).getUTCDay()) % 7)));
     const isDST = now >= marchSecondSunday && now < novFirstSunday;
@@ -745,7 +667,6 @@ async function fetchDataForAsset(asset) {
 async function analyzeMarket() {
     const btn = document.getElementById('analyzeBtn');
 
-    /* === ПРОВЕРКА БАЛАНСА === */
     const balRaw = document.getElementById('balanceInput').value;
     const balNum = parseFloat(balRaw);
     if (!balRaw || !isFinite(balNum) || balNum <= 0) {
@@ -891,7 +812,6 @@ async function analyzeMarket() {
         if (isAsianSession) confidence = Math.max(20, confidence - 10);
         if (news.hasNews) confidence = Math.min(confidence, 15);
 
-        /* Время сделки 3–60 мин в зависимости от ТФ + ADX/ATR/StochRSI */
         let tradeMinutes;
         if (bestTf === '1min') tradeMinutes = 5;
         else if (bestTf === '5min') tradeMinutes = 10;
@@ -905,8 +825,8 @@ async function analyzeMarket() {
         if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.15);
         tradeMinutes = Math.max(3, Math.min(60, tradeMinutes));
 
-        /* === SL/TP СТРОГО ОТ БАЛАНСА (balNum уже проверен выше) === */
         let sltpHtml = '';
+        let _lossUsd, _profitUsd;
         if (dir !== 'WAIT') {
             const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
             const tpPrice = dir === 'UP' ? last + atr * 2 : last - atr * 2;
@@ -921,6 +841,8 @@ async function analyzeMarket() {
                 reasons.unshift('⛔ СТОП-ЛОСС (-$' + lossUsd.toFixed(2) + ') БОЛЬШЕ БАЛАНСА! Сделка отменена.');
                 confidence = 0;
             } else {
+                _lossUsd = lossUsd;
+                _profitUsd = profitUsd;
                 sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b>' +
                     '<br>📦 Лот: <b>' + lot + '</b> (от $' + balNum.toFixed(2) + ')' +
                     '<br><span class="sl">🛡 Стоп: -$' + lossUsd.toFixed(2) + '</span> | <span class="tp">💰 Тейк: +$' + profitUsd.toFixed(2) + '</span>';
@@ -934,6 +856,16 @@ async function analyzeMarket() {
         const timeMessage = (dir !== 'WAIT') ? '<br>⏱ Время сделки: <span class="conf">' + tradeMinutes + ' мин</span>' : '';
 
         updateScan(100, 'Готово!'); await sleep(400); hideScan();
+
+        lastIndicators = {
+            rsi: rsi, stochRsi: stochRsi, macd: macd.macd, macdSignal: macd.signal,
+            histogram: macd.histogram, crossover: macd.crossover, adx: adxData.adx,
+            plusDI: adxData.plusDI, minusDI: adxData.minusDI, atr: atr, atrPct: atrPct,
+            bbUpper: bb.upper, bbLower: bb.lower, ema9: e9, ema21: e21, ema50: e50,
+            pattern: pattern, score: score, dir: dir, confidence: confidence,
+            tf: tfLabel, tradeMinutes: tradeMinutes, slUsd: _lossUsd, tpUsd: _profitUsd,
+            price: last
+        };
 
         document.getElementById('aiText').innerHTML =
             '<b>ТФ: ' + tfLabel + '</b> · <span class="conf">Уверенность: ' + confidence + '%</span>' +
