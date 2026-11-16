@@ -150,11 +150,25 @@
     .scan-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--purple), var(--green)); border-radius: 3px; transition: width 0.4s ease; }
     .scan-percent { font-size: 14px; font-weight: 700; color: var(--accent); }
 
-    /* === ФИКС: прозрачный chartOverlay, виден лес и градиенты body === */
+    /* === ФИКС ФОНА ГРАФИКА: свой лес прямо в overlay === */
     #chartOverlay { position: fixed; inset: 0; z-index: 10002; display: none; flex-direction: column; }
+    #chartOverlay::before {
+        content: ''; position: fixed; inset: -30px;
+        background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=70&auto=format&fit=crop');
+        background-size: cover; background-position: center;
+        filter: blur(8px) brightness(0.55) saturate(1.1);
+        z-index: -2; pointer-events: none;
+    }
+    #chartOverlay::after {
+        content: ''; position: fixed; inset: 0;
+        background-image:
+            radial-gradient(circle at 10% 10%, rgba(10, 132, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 90% 90%, rgba(48, 209, 88, 0.1) 0%, transparent 40%);
+        z-index: -1; pointer-events: none;
+    }
     #chartOverlay.active { display: flex; }
 
-    .chart-header-bar { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; background: rgba(24, 24, 26, 0.5); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border-bottom: 1px solid var(--border); z-index: 10; }
+    .chart-header-bar { display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; background: rgba(24, 24, 26, 0.45); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border-bottom: 1px solid var(--border); z-index: 10; }
     .chart-header-bar h3 { font-size: 16px; font-weight: 700; color: #fff; margin: 0; }
     .chart-close-btn { background: rgba(255, 69, 58, 0.15); color: var(--red); border: 1px solid rgba(255, 69, 58, 0.3); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; }
     .chart-close-btn:active { background: rgba(255, 69, 58, 0.3); transform: scale(0.95); }
@@ -163,20 +177,20 @@
     .chart-pane { flex: 1; width: 100%; background: #000; position: relative; }
     .chart-pane iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-    .ai-pane { flex: 1; width: 100%; background: rgba(24, 24, 26, 0.5); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
+    .ai-pane { flex: 1; width: 100%; background: rgba(24, 24, 26, 0.35); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
     .chat-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
     .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
-    .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
+    .chat-msg { padding: 10px 14px; border-radius: 14px; max-width: 85%; font-size: 13px; line-height: 1.5; word-wrap: break-word; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
     .chat-msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-    .chat-msg.ai { background: rgba(191, 90, 242, 0.18); border: 1px solid rgba(191, 90, 242, 0.35); color: #e2e2e2; align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-    .chat-msg.system { background: rgba(255,255,255,0.05); color: var(--text-dim); font-size: 11px; text-align: center; align-self: center; padding: 4px 10px; border-radius: 10px; }
+    .chat-msg.ai { background: rgba(191, 90, 242, 0.22); border: 1px solid rgba(191, 90, 242, 0.4); color: #f0e6f8; align-self: flex-start; border-bottom-left-radius: 4px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .chat-msg.system { background: rgba(255,255,255,0.08); color: var(--text-dim); font-size: 11px; text-align: center; align-self: center; padding: 4px 10px; border-radius: 10px; }
     .chat-input-area { display: flex; gap: 8px; margin-top: 10px; flex-shrink: 0; }
-    .chat-input-area input { flex: 1; padding: 12px 14px; font-size: 14px; border-radius: 14px; }
+    .chat-input-area input { flex: 1; padding: 12px 14px; font-size: 14px; border-radius: 14px; background: rgba(0,0,0,0.5); }
     .chat-input-area button { background: var(--accent); color: #fff; border: none; border-radius: 14px; width: 48px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .quick-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .quick-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-shrink: 0; }
     .quick-chips::-webkit-scrollbar { display: none; }
-    .chip { background: rgba(191, 90, 242, 0.15); border: 1px solid rgba(191, 90, 242, 0.35); color: #d9b3f5; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit; transition: 0.2s; }
-    .chip:active { transform: scale(0.95); background: rgba(191, 90, 242, 0.3); }
+    .chip { background: rgba(191, 90, 242, 0.2); border: 1px solid rgba(191, 90, 242, 0.4); color: #e0c4f5; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; font-family: inherit; transition: 0.2s; }
+    .chip:active { transform: scale(0.95); background: rgba(191, 90, 242, 0.35); }
     @media (min-width: 768px) {
         .chart-split-layout { flex-direction: row; }
         .chart-pane { flex: 2; }
@@ -625,7 +639,8 @@ function saveSettings() {
 }
 
 let currentKeyIndex = 0;
-async function fetchTwelveData(endpoint, params) {
+async function fetchTwelveData(endpoint, params, timeoutMs) {
+    timeoutMs = timeoutMs || 12000;
     const keys = getTwelveKeys();
     if (keys.length === 0) throw new Error('Нет API ключей');
     
@@ -635,7 +650,14 @@ async function fetchTwelveData(endpoint, params) {
         let key = keys[idx];
         let url = `https://api.twelvedata.com/${endpoint}?${params}&apikey=${key}`;
         try {
-            let res = await fetch(url);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            let res;
+            try {
+                res = await fetch(url, { signal: controller.signal });
+            } finally {
+                clearTimeout(timer);
+            }
             let data = await res.json();
             if (data.status === 'error' || data.code === 429) {
                 console.warn(`Ключ ${idx+1} не сработал:`, data.message);
@@ -645,8 +667,13 @@ async function fetchTwelveData(endpoint, params) {
             currentKeyIndex = idx;
             return data;
         } catch(e) {
-            console.warn(`Ключ ${idx+1} ошибка сети`);
-            lastError = e.message;
+            if (e.name === 'AbortError') {
+                console.warn(`Ключ ${idx+1}: таймаут ${timeoutMs}мс`);
+                lastError = 'Таймаут запроса';
+            } else {
+                console.warn(`Ключ ${idx+1} ошибка сети`);
+                lastError = e.message;
+            }
         }
     }
     throw new Error('Все ключи исчерпаны или неверны. ' + (lastError || ''));
@@ -783,16 +810,16 @@ async function askAI() {
 
 ТЕХНИЧЕСКИЙ АНАЛИЗ:
 - Свечные паттерны: доджи, молот, падающая звезда, бычье/медвежье поглощение, пинцет, харами, утренняя/вечерняя звезда, три солдата, три вороны, марубозу
-- Графические паттерны: голова и плечи, двойная/тройная вершина/дно, треугольники (восходящий, нисходящий, симметричный), флаг, вымпел, клин, чашка с ручкой
+- Графические паттерны: голова и плечи, двойная/тройная вершина/дно, треугольники, флаг, вымпел, клин, чашка с ручкой
 - Уровни: поддержка, сопротивление, пробой, ложный пробой, ретест, зоны S/R, round numbers
-- Тренды: линии тренда, каналы, веера, трендовая структура HH/HL/LH/LL
-- Fibonacci: коррекции (23.6%, 38.2%, 50%, 61.8%, 78.6%), расширения, веера, временные зоны
-- Elliott Waves: импульс (5 волн), коррекция (3 волны ABC), правила и исключения
+- Тренды: линии тренда, каналы, веера, структура HH/HL/LH/LL
+- Fibonacci: коррекции (23.6%, 38.2%, 50%, 61.8%, 78.6%), расширения, веера
+- Elliott Waves: импульс (5 волн), коррекция (3 волны ABC)
 - Volume Profile: POC, VAH, VAL, HVN, LVN
 
 ИНДИКАТОРЫ:
 - Трендовые: EMA (9/21/50/100/200), SMA, WMA, VWMA, Ichimoku, Parabolic SAR, Supertrend
-- Осцилляторы: RSI (дивергенции, перепроданность/перекупленность, уровни 30/70/50), Stochastic, StochRSI, CCI, Williams %R, Momentum
+- Осцилляторы: RSI (дивергенции, перепроданность/перекупленность), Stochastic, StochRSI, CCI, Williams %R, Momentum
 - MACD: сигнальная линия, гистограмма, дивергенции, кроссоверы
 - Bollinger Bands: сжатие, расширение, пробой, отскок от полос, walking the bands
 - ADX: сила тренда (>25 сильный, <20 слабый), +DI/-DI
@@ -808,7 +835,7 @@ async function askAI() {
 - Kelly Criterion
 - Максимальная просадка
 - Статистика: winrate, profit factor, ожидание
-- Пирамидинг и усреднение (когда можно, когда нельзя)
+- Пирамидинг и усреднение
 
 ПСИХОЛОГИЯ:
 - FOMO, тильт, страх, жадность
@@ -818,21 +845,17 @@ async function askAI() {
 - Осознанность и контроль эмоций
 
 СТРАТЕГИИ:
-- Скальпинг (M1-M5): особенности, пары, время
-- Дейтрейдинг (M15-H1)
-- Свинг (H4-D1)
-- Позиционная (W1-MN)
+- Скальпинг (M1-M5), Дейтрейдинг (M15-H1), Свинг (H4-D1), Позиционная (W1-MN)
 - Трендовая, контртрендовая, пробойная
 - Smart Money Concepts (SMC): order blocks, FVG, liquidity, BOS/CHoCH
 - ICT concepts: killzones, judas swing, silver bullet
 - Price Action, Order Flow
 
 ФУНДАМЕНТ:
-- ФРС: ставки, QE, QT, пауэлл-паузы
+- ФРС: ставки, QE, QT
 - Экономические данные: NFP, CPI, PPI, GDP, PMI, PCE, розничные продажи, безработица
-- Влияние новостей на пары
 - Корреляции: EUR/USD ↔ DXY, золото ↔ USD, крипта ↔ риск-аппетит
-- Сессии: азиатская (слабая), лондонская (волатильная), нью-йоркская (мощная), оверлап
+- Сессии: азиатская, лондонская, нью-йоркская, оверлап
 
 КРИПТА:
 - Блокчейн, газ, комиссии
@@ -856,14 +879,14 @@ async function askAI() {
 
 ⚠️ ПРАВИЛА ОТВЕТА:
 1. Отвечай ТОЛЬКО на русском
-2. Будь конкретным — цифры, примеры, объяснения. БЕЗ ВОДЫ.
-3. Используй эмодзи для структуры: 📈 📉 ⚠️ 💡 🎯 ✅ ❌ 🔥 🛡️
-4. Разбивай длинные ответы на пункты (•) или шаги (1, 2, 3)
+2. Будь конкретным — цифры, примеры. БЕЗ ВОДЫ.
+3. Используй эмодзи: 📈 📉 ⚠️ 💡 🎯 ✅ ❌ 🔥 🛡️
+4. Длинные ответы — на пункты (•) или шаги (1, 2, 3)
 5. Для новичков — простым языком, для опытных — профессионально
-6. Если спрашивают про текущий сигнал — используй данные анализа ниже
+6. Если спрашивают про сигнал — используй данные анализа ниже
 7. Напоминай про риски, но НЕ ОТКАЗЫВАЙСЯ отвечать
 8. Не давай финансовых гарантий, но можешь давать ТОРГОВЫЕ рекомендации
-9. Если вопрос не про трейдинг — мягко верни к теме, но ответь кратко
+9. Не про трейдинг — мягко верни к теме, но ответь кратко
 10. Максимум пользы за минимум слов
 
 📊 ТЕКУЩИЙ КОНТЕКСТ:
@@ -876,22 +899,30 @@ async function askAI() {
 `;
 
     if (lastAnalysisContext) {
-        sysPrompt += `\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ БОТА (используй для ответов на вопросы про сигнал):\n${lastAnalysisContext}`;
+        sysPrompt += `\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ БОТА:\n${lastAnalysisContext}`;
     } else {
-        sysPrompt += `\n\n⚠️ Пользователь ещё не запускал технический анализ для этой пары. Если спрашивает про сигнал — скажи нажать "⚡ ЗАПУСТИТЬ ИИ" для точных данных. Но на общие вопросы о трейдинге отвечай всегда.`;
+        sysPrompt += `\n\n⚠️ Пользователь ещё не запускал тех анализ для этой пары. Если спрашивает про сигнал — скажи нажать "⚡ ЗАПУСТИТЬ ИИ". На общие вопросы о трейдинге отвечай всегда.`;
     }
 
     try {
-        const res = await fetch("https://text.pollinations.ai/openai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "openai",
-                messages: [{ role: "system", content: sysPrompt }, ...chatHistory],
-                temperature: 0.7,
-                max_tokens: 800
-            })
-        });
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 25000);
+        let res;
+        try {
+            res = await fetch("https://text.pollinations.ai/openai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "openai",
+                    messages: [{ role: "system", content: sysPrompt }, ...chatHistory],
+                    temperature: 0.7,
+                    max_tokens: 800
+                }),
+                signal: controller.signal
+            });
+        } finally {
+            clearTimeout(timer);
+        }
         if (!res.ok) throw new Error('API error ' + res.status);
         const data = await res.json();
         const reply = data.choices[0].message.content;
@@ -904,7 +935,7 @@ async function askAI() {
         addChatMessage(reply, 'ai');
     } catch(e) {
         const typingEl = document.getElementById('aiTyping');
-        if (typingEl) typingEl.textContent = '⚠️ Ошибка соединения. Проверьте интернет и попробуйте ещё раз.';
+        if (typingEl) typingEl.textContent = '⚠️ Ошибка соединения с ИИ. Попробуйте ещё раз.';
     } finally {
         isAiTyping = false;
     }
@@ -975,7 +1006,14 @@ async function checkNewsFilter(asset) {
 
     try {
         const url = `https://showmytrades.com/api/public/calendar/v1?impact=high&days=1`;
-        const res = await fetch(url);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+        let res;
+        try {
+            res = await fetch(url, { signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
         if (!res.ok) throw new Error('News API error');
         const data = await res.json();
         
@@ -1011,7 +1049,12 @@ function filterUpcomingNews(asset, events) {
 }
 
 function isMarketOpen(asset) {
-    if (asset.type === 'crypto') return { open: true, reason: 'Криптовалюты 24/7' };
+    // Чистая крипта (не золото) — 24/7
+    if (asset.type === 'crypto' && asset.td !== 'XAU/USD') return { open: true, reason: 'Криптовалюты 24/7' };
+    
+    // Форекс и металлы (XAU) — по будням
+    const isForexLike = asset.type === 'forex' || asset.td === 'XAU/USD';
+    if (!isForexLike) return { open: true, reason: 'Открыто' };
     
     const now = new Date();
     const day = now.getUTCDay();
@@ -1024,14 +1067,12 @@ function isMarketOpen(asset) {
     
     const marketOpenMinutes = isDST ? 21 * 60 : 22 * 60;
     const mskOpenString = isDST ? "00:00 МСК (лето)" : "01:00 МСК (зима)";
+    const label = asset.td === 'XAU/USD' ? 'Металлы' : 'Форекс';
 
-    if (asset.type === 'forex') {
-        if (day === 6) return { open: false, reason: "Суббота — рынок закрыт" };
-        if (day === 0 && timeInMinutes < marketOpenMinutes) return { open: false, reason: "Форекс откроется в " + mskOpenString };
-        if (day === 5 && timeInMinutes >= marketOpenMinutes) return { open: false, reason: "Форекс закрыт до воскресенья (" + mskOpenString + ")" };
-        return { open: true, reason: "Форекс открыт" };
-    }
-    return { open: true, reason: "Открыто" };
+    if (day === 6) return { open: false, reason: "Суббота — " + label.toLowerCase() + " закрыт" };
+    if (day === 0 && timeInMinutes < marketOpenMinutes) return { open: false, reason: label + " откроется в " + mskOpenString };
+    if (day === 5 && timeInMinutes >= marketOpenMinutes) return { open: false, reason: label + " закрыт до воскресенья (" + mskOpenString + ")" };
+    return { open: true, reason: label + " открыт" };
 }
 
 async function getBestTimeframe(asset) {
@@ -1145,529 +1186,4 @@ async function analyzeMarket() {
     else if (e9 > e21) { score += 1; reasons.push('📈 EMA 9>21'); }
     else { score -= 1; reasons.push('📉 EMA 9<21'); }
 
-    if (macd.macd > macd.signal && macd.histogram > 0) { score += 1; reasons.push('🟢 MACD бычий'); }
-    else if (macd.macd < macd.signal && macd.histogram < 0) { score -= 1; reasons.push('🔴 MACD медвежий'); }
-    if (macd.crossover === 'bull') { score += 0.5; reasons.push('⚡ MACD crossover ↑'); }
-    if (macd.crossover === 'bear') { score -= 0.5; reasons.push('⚡ MACD crossover ↓'); }
-
-    const oversoldCount = (rsi < 30 ? 1 : 0) + (stochRsi < 20 ? 1 : 0);
-    const overboughtCount = (rsi > 70 ? 1 : 0) + (stochRsi > 80 ? 1 : 0);
-    if (rsi < 30) reasons.push('📊 RSI ' + rsi.toFixed(0) + ' (перепродан)');
-    else if (rsi > 70) reasons.push('📊 RSI ' + rsi.toFixed(0) + ' (перекуплен)');
-    if (stochRsi < 20) reasons.push('⚡ StochRSI ' + stochRsi.toFixed(0) + ' (перепродан)');
-    else if (stochRsi > 80) reasons.push('⚡ StochRSI ' + stochRsi.toFixed(0) + ' (перекуплен)');
-    if (oversoldCount === 2) score += 1.5;
-    else if (oversoldCount === 1) score += 0.7;
-    if (overboughtCount === 2) score -= 1.5;
-    else if (overboughtCount === 1) score -= 0.7;
-
-    if (last > bb.upper && score > 0) { score -= 1; reasons.push('⛔ Пробой верхней BB'); }
-    if (last < bb.lower && score < 0) { score += 1; reasons.push('⛔ Пробой нижней BB'); }
-
-    if (adxData.adx > 25) {
-        if (adxData.plusDI > adxData.minusDI) { score += 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↑ (Бычий)'); }
-        else { score -= 0.7; reasons.push('🔥 ADX ' + adxData.adx.toFixed(0) + ' ↓ (Медвежий)'); }
-        if (adxData.adx > 40) { score += Math.sign(score) * 0.5; reasons.push('💪 Очень сильный тренд'); }
-    } else if (adxData.adx < 20) {
-        score *= 0.3;
-        reasons.push('⚠️ Слабый тренд (ADX<20)');
-    }
-
-    if (pattern) {
-        if (pattern.includes('Бычье') || pattern.includes('Молот')) { score += 1.5; reasons.push('🕯️ ' + pattern); }
-        if (pattern.includes('Медвежье') || pattern.includes('звезда')) { score -= 1.5; reasons.push('🕯️ ' + pattern); }
-    }
-
-    if (volumes.length > 20) {
-        const avgVol = volumes.slice(-20, -1).reduce((a,b)=>a+b,0) / 19;
-        const lastVol = volumes[volumes.length-1];
-        if (lastVol > avgVol * 1.5) { score += Math.sign(score) * 0.5; reasons.push('📊 Объём ×1.5'); }
-        else if (lastVol < avgVol * 0.5) { reasons.push('📊 Низкий объём'); }
-    }
-
-    const atrPct = last ? (atr / last * 100) : 0;
-    if (atrPct > 3) reasons.push('⚡ Высокая волатильность (ATR ' + atrPct.toFixed(1) + '%)');
-
-    const utcHour = new Date().getUTCHours();
-    const isAsianSession = asset.type === 'forex' && utcHour >= 0 && utcHour < 7 && (key === 'EURUSD' || key === 'GBPUSD');
-    if (isAsianSession) reasons.push('🌏 Азиатская сессия (слабый тренд)');
-
-    let dir = score >= 1 ? 'UP' : (score <= -1 ? 'DOWN' : 'WAIT');
-    if (news.hasNews) {
-        dir = 'WAIT';
-        reasons.unshift(news.message);
-    }
-
-    const absScore = Math.abs(score);
-    let confidence = Math.min(99, Math.round(absScore * 14 + 22));
-    if (isAsianSession) confidence = Math.max(20, confidence - 10);
-
-    let tradeMinutes;
-    if (asset.type === 'crypto') {
-        tradeMinutes = 10;
-        if (bestTf === '1h') tradeMinutes = 20;
-        else if (bestTf === '4h') tradeMinutes = 30;
-        if (adxData.adx > 35) tradeMinutes = Math.round(tradeMinutes * 1.5);
-        tradeMinutes = Math.min(tradeMinutes, 45);
-    } else {
-        tradeMinutes = 15;
-        if (bestTf === '1h') tradeMinutes = 30;
-        else if (bestTf === '4h') tradeMinutes = 60;
-        if (adxData.adx > 35) tradeMinutes *= 2;
-        tradeMinutes = Math.min(tradeMinutes, 90);
-    }
-
-    if (stochRsi < 20 || stochRsi > 80) tradeMinutes = Math.max(5, Math.round(tradeMinutes * 0.33));
-    if (atrPct > 2) tradeMinutes = Math.round(tradeMinutes * 0.7);
-    if (atrPct < 0.3) tradeMinutes = Math.round(tradeMinutes * 1.3);
-
-    let sltpHtml = '';
-    if (dir !== 'WAIT') {
-        const slPrice = dir === 'UP' ? last - atr * 1.5 : last + atr * 1.5;
-        const tpPrice = dir === 'UP' ? last + atr * 2 : last - atr * 2;
-        
-        const bal = parseFloat(document.getElementById('balanceInput').value) || 100;
-        const lot = calcAutoLot(key, bal, last);
-        const pipVal = asset.pipValFn ? asset.pipValFn(last) : asset.pipVal;
-        
-        const slDistance = Math.abs(last - slPrice);
-        const tpDistance = Math.abs(tpPrice - last);
-        
-        const slPips = slDistance / asset.pip;
-        const tpPips = tpDistance / asset.pip;
-        
-        const lossUsd = (slPips * pipVal * lot);
-        const profitUsd = (tpPips * pipVal * lot);
-
-        if (lossUsd > bal) {
-            dir = 'WAIT';
-            reasons.unshift(`⛔ СТОП-ЛОСС (-$${lossUsd.toFixed(2)}) БОЛЬШЕ ВАШЕГО БАЛАНСА! Сделка отменена.`);
-            confidence = 0;
-        } else {
-            sltpHtml = '<br>🎯 Вход: <b>' + last.toFixed(asset.dec) + '</b><br>' +
-                       '<span class="sl">🛡 Стоп: -$' + lossUsd.toFixed(2) + '</span> | ' +
-                       '<span class="tp">💰 Тейк: +$' + profitUsd.toFixed(2) + '</span>';
-        }
-    }
-    
-    const timeMessage = (dir !== 'WAIT') ? '<br>⏱ Время сделки: <span class="conf">' + tradeMinutes + ' мин</span>' : '';
-
-    updateScan(100, 'Готово!');
-    await sleep(400);
-    hideScan();
-
-    const aiContent = '<b>ТФ: ' + bestTf.toUpperCase() + '</b> · <span class="conf">Уверенность: ' + confidence + '%</span><br>' +
-        reasons.join('<br>') + sltpHtml + timeMessage;
-
-    document.getElementById('aiText').innerHTML = aiContent;
-    document.getElementById('aiBox').style.display = 'block';
-    const actEl = document.getElementById('signalAction');
-    actEl.textContent = dir === 'UP' ? 'ВВЕРХ (CALL)' : (dir === 'DOWN' ? 'ВНИЗ (PUT)' : (news.hasNews ? 'НОВОСТИ' : 'ОЖИДАНИЕ'));
-    actEl.className = 'signal-action ' + (dir === 'UP' ? 'up' : (dir === 'DOWN' ? 'down' : 'wait'));
-
-    if (dir !== 'WAIT') {
-        playAlert();
-        document.getElementById('timeBox').style.display = 'block';
-        document.getElementById('tradeTimeValue').textContent = tradeMinutes + ' МИН';
-        document.getElementById('tradeTfValue').textContent = 'ТФ: ' + bestTf.toUpperCase();
-    }
-
-    if (news.hasNews) {
-        document.getElementById('warningBox').innerHTML = news.message;
-        document.getElementById('warningBox').style.display = 'block';
-    }
-
-    document.getElementById('signalBox').style.display = 'block';
-    
-    lastAnalysisContext = `Сигнал: ${dir}. Уверенность: ${confidence}%. Цена входа: ${last.toFixed(asset.dec)}. Таймфрейм: ${bestTf.toUpperCase()}.
-    Технические индикаторы: RSI=${rsi.toFixed(1)}, StochRSI=${stochRsi.toFixed(1)}, MACD=${macd.histogram > 0 ? 'бычий' : 'медвежий'}, ADX=${adxData.adx.toFixed(1)} (сила тренда), ATR=${atrPct.toFixed(2)}% (волатильность).
-    EMA9=${ema9[ema9.length-1].toFixed(asset.dec)}, EMA21=${ema21[ema21.length-1].toFixed(asset.dec)}, EMA50=${ema50.length ? ema50[ema50.length-1].toFixed(asset.dec) : 'N/A'}.
-    Bollinger Bands: upper=${bb.upper.toFixed(asset.dec)}, lower=${bb.lower.toFixed(asset.dec)}.
-    ${pattern ? 'Паттерн: ' + pattern + '.' : ''}
-    Причины сигнала: ${reasons.join('; ')}.
-    Рекомендация бота: держать сделку ${tradeMinutes} минут.`;
-
-    if (isChartOpen) addChatMessage('⚡ Анализ ' + asset.name + ' завершён. Задайте вопрос ИИ по этому сигналу.', 'system');
-
-    updateRisk();
-    btn.disabled = false;
-    btn.textContent = '⚡ ЗАПУСТИТЬ ИИ';
-}
-
-function calcEMA(a, p) { const k = 2/(p+1); let e=[a[0]]; for (let i=1; i<a.length; i++) e.push(a[i]*k + e[i-1]*(1-k)); return e; }
-
-function calcRSI(closes, period) {
-    period = period || 14;
-    if (closes.length < period+1) return 50;
-    let g=0, l=0;
-    for (let i=closes.length-period; i<closes.length; i++) {
-        const d = closes[i] - closes[i-1];
-        d >= 0 ? g += d : l -= d;
-    }
-    const rs = (g/period) / ((l/period) || 1);
-    return 100 - 100/(1+rs);
-}
-
-function calcStochRSI(closes, rsiPeriod, stochPeriod) {
-    rsiPeriod = rsiPeriod || 14; stochPeriod = stochPeriod || 14;
-    if (closes.length < rsiPeriod + stochPeriod) return 50;
-    let rsiArr = [];
-    for (let i=rsiPeriod; i<closes.length; i++) {
-        let g=0, l=0;
-        for (let j=1; j<=rsiPeriod; j++) {
-            const d = closes[i-j+1] - closes[i-j];
-            d >= 0 ? g += d : l -= d;
-        }
-        const rs = (g/rsiPeriod) / ((l/rsiPeriod) || 1);
-        rsiArr.push(100 - 100/(1+rs));
-    }
-    if (rsiArr.length < stochPeriod) return 50;
-    const subRsi = rsiArr.slice(-stochPeriod);
-    const min = Math.min.apply(null, subRsi), max = Math.max.apply(null, subRsi);
-    if (max === min) return 50;
-    return ((rsiArr[rsiArr.length-1] - min) / (max - min)) * 100;
-}
-
-function calcMACD(closes) {
-    const fast = 12, slow = 26, sig = 9;
-    if (closes.length < slow + sig) return { macd:0, signal:0, histogram:0, crossover:null };
-    const emaFast = calcEMA(closes, fast), emaSlow = calcEMA(closes, slow);
-    const macdLine = emaFast.map(function(v,i){ return v - emaSlow[i]; });
-    const sigLine = calcEMA(macdLine.slice(slow-1), sig);
-    const lastMacd = macdLine[macdLine.length-1], lastSig = sigLine[sigLine.length-1];
-    const prevMacd = macdLine[macdLine.length-2], prevSig = sigLine[sigLine.length-2];
-    let crossover = null;
-    if (prevMacd <= prevSig && lastMacd > lastSig) crossover = 'bull';
-    if (prevMacd >= prevSig && lastMacd < lastSig) crossover = 'bear';
-    return { macd: lastMacd, signal: lastSig, histogram: lastMacd - lastSig, crossover: crossover };
-}
-
-function calcATR(highs, lows, closes, period) {
-    period = period || 14;
-    if (closes.length < period+1) return 0;
-    let trs = [];
-    for (let i=1; i<closes.length; i++) {
-        trs.push(Math.max(highs[i]-lows[i], Math.abs(highs[i]-closes[i-1]), Math.abs(lows[i]-closes[i-1])));
-    }
-    let atr = trs.slice(0, period).reduce(function(a,b){return a+b;}, 0) / period;
-    for (let i=period; i<trs.length; i++) atr = (atr*(period-1) + trs[i]) / period;
-    return atr;
-}
-
-function calcADX(highs, lows, closes, period) {
-    period = period || 14;
-    if (closes.length < period*2) return { adx: 25, plusDI: 50, minusDI: 50 };
-    let trArr=[], plusDMArr=[], minusDMArr=[];
-    for (let i=1; i<closes.length; i++) {
-        const tr = Math.max(highs[i]-lows[i], Math.abs(highs[i]-closes[i-1]), Math.abs(lows[i]-closes[i-1]));
-        const up = highs[i]-highs[i-1], dn = lows[i-1]-lows[i];
-        trArr.push(tr);
-        plusDMArr.push((up > dn && up > 0) ? up : 0);
-        minusDMArr.push((dn > up && dn > 0) ? dn : 0);
-    }
-    let sTR = trArr.slice(0, period).reduce(function(a,b){return a+b;}, 0);
-    let sPDM = plusDMArr.slice(0, period).reduce(function(a,b){return a+b;}, 0);
-    let sMDM = minusDMArr.slice(0, period).reduce(function(a,b){return a+b;}, 0);
-    let dxArr = [], lastPDI = 0, lastMDI = 0;
-    for (let i=period; i<trArr.length; i++) {
-        sTR = sTR - (sTR/period) + trArr[i];
-        sPDM = sPDM - (sPDM/period) + plusDMArr[i];
-        sMDM = sMDM - (sMDM/period) + minusDMArr[i];
-        const plusDI = 100 * (sPDM / (sTR||1)), minusDI = 100 * (sMDM / (sTR||1));
-        dxArr.push(100 * Math.abs(plusDI - minusDI) / ((plusDI + minusDI)||1));
-        lastPDI = plusDI; lastMDI = minusDI;
-    }
-    if (dxArr.length < period) return { adx: 25, plusDI: 50, minusDI: 50 };
-    let adx = dxArr.slice(0, period).reduce(function(a,b){return a+b;}, 0) / period;
-    for (let i=period; i<dxArr.length; i++) adx = (adx*(period-1) + dxArr[i]) / period;
-    return { adx: adx, plusDI: lastPDI, minusDI: lastMDI };
-}
-
-function detectCandlePattern(opens, highs, lows, closes) {
-    if (closes.length < 2) return null;
-    const i = closes.length-1;
-    const o = opens[i], h = highs[i], l = lows[i], c = closes[i];
-    const po = opens[i-1], pc = closes[i-1];
-    const body = Math.abs(c-o);
-    const upperWick = h - Math.max(c, o);
-    const lowerWick = Math.min(c, o) - l;
-    if (pc < po && c > o && c > po && o < pc) return 'Бычье поглощение';
-    if (pc > po && c < o && c < po && o > pc) return 'Медвежье поглощение';
-    if (body > 0 && lowerWick > body*2 && upperWick < body*0.5) return 'Молот';
-    if (body > 0 && upperWick > body*2 && lowerWick < body*0.5) return 'Падающая звезда';
-    return null;
-}
-
-function calcBollingerBands(data, period, mult) {
-    period = period || 20; mult = mult || 2;
-    if (data.length < period) return { upper: Infinity, lower: -Infinity };
-    const slice = data.slice(-period);
-    const sma = slice.reduce(function(a,b){return a+b;}, 0) / period;
-    const variance = slice.reduce(function(a,b){return a+Math.pow(b-sma,2);}, 0) / period;
-    const sd = Math.sqrt(variance);
-    return { upper: sma + mult*sd, lower: sma - mult*sd };
-}
-
-function changePair() {
-    document.getElementById('signalBox').style.display = 'none';
-    document.getElementById('aiBox').style.display = 'none';
-    document.getElementById('warningBox').style.display = 'none';
-    document.getElementById('timeBox').style.display = 'none';
-    lastAnalysisContext = '';
-    document.getElementById('statPrice').textContent = '...';
-    document.getElementById('statHighLow').textContent = '— / —';
-    document.getElementById('statVol').textContent = '—';
-    document.getElementById('statTrend').textContent = '...';
-    document.getElementById('statTrend').className = 'v';
-    if (isChartOpen) {
-        document.getElementById('chartHeaderPair').textContent = ASSETS[document.getElementById('pairSelect').value].name;
-        loadTradingView();
-        addChatMessage('Переключение на ' + ASSETS[document.getElementById('pairSelect').value].name, 'system');
-    }
-    fetch24hStats(ASSETS[document.getElementById('pairSelect').value]);
-}
-
-async function fetch24hStats(asset) {
-    if (!asset) return;
-    try {
-        if (getTwelveKeys().length === 0 || !asset.td) throw new Error('Нет ключей');
-        const data = await fetchTwelveData('quote', 'symbol=' + encodeURIComponent(asset.td));
-        if (data.status === 'error') throw new Error(data.message);
-        const price = parseFloat(data.close);
-        document.getElementById('statPrice').textContent = price.toFixed(asset.dec);
-        document.getElementById('statHighLow').textContent = parseFloat(data.high).toFixed(asset.dec) + ' / ' + parseFloat(data.low).toFixed(asset.dec);
-        document.getElementById('statVol').textContent = data.volume ? (parseFloat(data.volume)/1000).toFixed(1) + 'K' : '—';
-        currentPrice = price;
-        const chg = parseFloat(data.percent_change);
-        const trendEl = document.getElementById('statTrend');
-        const chgThreshold = asset.type === 'forex' ? 0.1 : 1;
-        if (chg > chgThreshold) { trendEl.textContent = 'Бычий'; trendEl.className = 'v green'; }
-        else if (chg < -chgThreshold) { trendEl.textContent = 'Медвежий'; trendEl.className = 'v red'; }
-        else { trendEl.textContent = 'Флэт'; trendEl.className = 'v'; }
-        updateRisk();
-    } catch(e) {
-        document.getElementById('statPrice').textContent = '—';
-    }
-}
-
-function playAlert() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.5);
-    } catch(e) {}
-}
-function calculateWinrate() {
-    const hist = JSON.parse(safeGet('tuchkov_history')) || [];
-    const closed = hist.filter(function(h) { return h.result === 'win' || h.result === 'loss'; });
-    if (closed.length === 0) return;
-    const wins = closed.filter(function(h) { return h.result === 'win'; }).length;
-    document.getElementById('winrateBadge').style.display = 'flex';
-    document.getElementById('winrateText').textContent = Math.round((wins/closed.length)*100) + '% (' + wins + '/' + closed.length + ')';
-}
-function getRiskPercent(b) { if (b <= 20) return 6.0; if (b <= 50) return 4.5; return 3.0; }
-
-function toggleAutoSignals(cb) {
-    if (cb.checked) {
-        if (getTwelveKeys().length === 0) {
-            alert('⚠️ Для авто-сигналов добавьте Twelve Data API ключи в настройках');
-            cb.checked = false;
-            return;
-        }
-        if (!('Notification' in window)) { alert('Браузер не поддерживает уведомления'); cb.checked = false; return; }
-        Notification.requestPermission().then(function(p) {
-            if (p === 'granted') {
-                if (autoInterval) clearInterval(autoInterval);
-                autoInterval = setInterval(checkAutoSignal, 60000);
-                alert('Авто-сигналы включены!');
-            } else {
-                cb.checked = false;
-                alert('Разрешите уведомления в Safari');
-            }
-        });
-    } else {
-        if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
-    }
-}
-
-async function checkAutoSignal() {
-    const key = document.getElementById('pairSelect').value;
-    const asset = ASSETS[key];
-    if (!asset || !isMarketOpen(asset).open) return;
-    if (getTwelveKeys().length === 0 || !asset.td) return;
-
-    const news = await checkNewsFilter(asset);
-    if (news.hasNews) return;
-
-    try {
-        const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
-        if (!data.values) return;
-        const closes = data.values.slice().reverse().map(v => parseFloat(v.close));
-        if (closes.length < 22) return;
-        const ema9 = calcEMA(closes, 9), ema21 = calcEMA(closes, 21);
-        const last9 = ema9[ema9.length-1], last21 = ema21[ema21.length-1];
-        if (last9 && last21 && (last9 > last21*1.0005 || last9 < last21*0.9995)) {
-            const dir = last9 > last21 ? 'ВВЕРХ' : 'ВНИЗ';
-            playAlert();
-            new Notification('Tuchkov AI: ' + asset.name, { body: 'Сигнал: ' + dir });
-        }
-    } catch(e) {}
-}
-
-async function runScanner() {
-    if (getTwelveKeys().length === 0) {
-        alert('⚠️ Для работы сканера добавьте Twelve Data API ключи в настройках');
-        return;
-    }
-    try {
-        showScan();
-        await sleep(150);
-        updateScan(5, 'Инициализация сканера...');
-        await sleep(200);
-
-        const news = await checkNewsFilter({ type:'crypto', td:'XAU/USD' });
-        const results = [];
-        const total = Object.keys(ASSETS).length;
-        let processed = 0;
-
-        for (const key of Object.keys(ASSETS)) {
-            const asset = ASSETS[key];
-            processed++;
-            const pct = Math.round((processed / total) * 85) + 10;
-            updateScan(pct, 'Анализ ' + asset.name + ' (' + processed + '/' + total + ')...');
-
-            const market = isMarketOpen(asset);
-            if (!market.open) { results.push({ key:key, asset:asset, dir:'CLOSED', score:0, last:0, reason:market.reason }); continue; }
-            
-            const assetNews = filterUpcomingNews(asset, newsCache);
-            if (assetNews.hasNews) {
-                results.push({ key:key, asset:asset, dir:'WAIT', score:0, last:0, reason: 'Новости' });
-                continue;
-            }
-
-            try {
-                if (!asset.td) throw new Error('no td');
-                const data = await fetchTwelveData('time_series', 'symbol=' + encodeURIComponent(asset.td) + '&interval=15min&outputsize=50');
-                if (!data.values || data.values.length < 22) throw new Error('bad');
-                const closes = data.values.slice().reverse().map(v => parseFloat(v.close));
-                const ema9 = calcEMA(closes, 9), ema21 = calcEMA(closes, 21);
-                const score = (ema9[ema9.length-1] > ema21[ema21.length-1]) ? 1 : -1;
-                results.push({ key:key, asset:asset, dir:score >= 1 ? 'UP':'DOWN', score:score, last:closes[closes.length-1] });
-            } catch(e) { results.push({ key:key, asset:asset, dir:'WAIT', score:0, last:0 }); }
-        }
-
-        updateScan(96, 'Формирование результатов...');
-        await sleep(300);
-        updateScan(100, 'Готово!');
-        await sleep(400);
-        
-        results.sort(function(a,b) {
-            if (a.dir === 'CLOSED' && b.dir !== 'CLOSED') return 1;
-            if (a.dir !== 'CLOSED' && b.dir === 'CLOSED') return -1;
-            return Math.abs(b.score) - Math.abs(a.score);
-        });
-
-        const grid = document.getElementById('scannerGrid');
-        grid.innerHTML = results.map(function(r) {
-            let tagText = '', tagClass = '';
-            if (r.dir === 'CLOSED') { tagText = 'ЗАКРЫТ'; tagClass = 'closed'; }
-            else if (r.dir === 'UP') { tagText = 'ВВЕРХ'; tagClass = 'up'; }
-            else if (r.dir === 'DOWN') { tagText = 'ВНИЗ'; tagClass = 'down'; }
-            else { tagText = 'ОЖИДАНИЕ'; tagClass = 'wait'; }
-            const priceText = r.dir === 'CLOSED' ? r.reason : (r.reason ? '⚠️ ' + r.reason : 'Цена: ' + (r.last ? r.last.toFixed(r.asset.dec) : '—'));
-            return '<div class="scan-card"><div class="pair">' + r.asset.name + '</div><div class="price">' + priceText + '</div><div class="signal-tag ' + tagClass + '">' + tagText + '</div></div>';
-        }).join('');
-    } catch (e) {
-        alert('Ошибка сканирования: ' + e.message);
-    } finally {
-        hideScan();
-    }
-}
-
-function getTrades() { try { return JSON.parse(safeGet('tuchkov_trades')) || []; } catch(e) { return []; } }
-function saveTrades(t) { safeSet('tuchkov_trades', JSON.stringify(t)); }
-
-function addTrade() {
-    const pair = document.getElementById('pPair').value;
-    const dir = document.getElementById('pDir').value;
-    const price = parseFloat(document.getElementById('pPrice').value);
-    const lot = parseFloat(document.getElementById('pLot').value);
-    if (!price || !lot) return alert('Введите цену и лот');
-    const trades = getTrades();
-    trades.push({ id: Date.now(), pair: pair, dir: dir, entry: price, lot: lot, current: price });
-    saveTrades(trades);
-    renderTrades();
-    document.getElementById('pPrice').value = '';
-}
-
-function renderTrades() {
-    const list = document.getElementById('tradesList');
-    const trades = getTrades();
-    if (trades.length === 0) {
-        list.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:20px;">Нет открытых сделок.</div>';
-        return;
-    }
-    list.innerHTML = trades.map(function(t) {
-        const asset = ASSETS[t.pair];
-        if (!asset) return '';
-        const diff = t.dir === 'UP' ? (t.current - t.entry) : (t.entry - t.current);
-        const pipVal = asset.pipValFn ? asset.pipValFn(t.current) : asset.pipVal;
-        const pnl = (diff / asset.pip) * pipVal * t.lot;
-        return '<div class="trade-card">' +
-            '<div class="trade-info">' +
-                '<div class="pair">' + asset.name + '</div>' +
-                '<div class="dir ' + t.dir.toLowerCase() + '">' + (t.dir === 'UP' ? 'CALL' : 'PUT') + '</div>' +
-                '<div style="font-size:11px; color:var(--text-dim); margin-top:4px;">Вход: ' + t.entry + ' | Лот: ' + t.lot + '</div>' +
-            '</div>' +
-            '<div style="display:flex; align-items:center;">' +
-                '<div class="trade-pnl ' + (pnl >= 0 ? 'positive' : 'negative') + '">' + (pnl > 0 ? '+' : '') + pnl.toFixed(2) + ' $</div>' +
-                '<button class="btn-close-trade" onclick="closeTrade(' + t.id + ',' + pnl + ')">Закрыть</button>' +
-            '</div>' +
-        '</div>';
-    }).join('');
-}
-
-async function updatePortfolioPrices() {
-    let trades = getTrades();
-    if (trades.length === 0) { renderTrades(); return; }
-    if (getTwelveKeys().length === 0) return;
-
-    for (let t of trades) {
-        const asset = ASSETS[t.pair];
-        if (!asset || !asset.td) continue;
-        try {
-            const data = await fetchTwelveData('price', 'symbol=' + encodeURIComponent(asset.td));
-            if (data.price) t.current = parseFloat(data.price);
-        } catch(e) {}
-    }
-    saveTrades(trades);
-    renderTrades();
-}
-
-function closeTrade(id, pnl) {
-    let trades = getTrades().filter(function(t) { return t.id !== id; });
-    saveTrades(trades);
-    renderTrades();
-    let hist = JSON.parse(safeGet('tuchkov_history')) || [];
-    hist.push({ result: pnl > 0 ? 'win' : 'loss', timestamp: Date.now() });
-    safeSet('tuchkov_history', JSON.stringify(hist));
-    calculateWinrate();
-    alert('Сделка закрыта!');
-}
-
-window.addEventListener('load', function() {
-    try { updateKeyStatus(); } catch(e) {}
-    try { updateRisk(); } catch(e) {}
-    try { calculateWinrate(); } catch(e) {}
-    try { renderTrades(); } catch(e) {}
-    try { changePair(); } catch(e) {}
-});
-</script>
-</body>
-</html>
+    if (macd.macd > macd.signal && macd.histogram > 0)
