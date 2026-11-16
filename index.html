@@ -142,8 +142,8 @@
     .key-status.active .key-status-dot { background: var(--green); box-shadow: 0 0 8px rgba(48, 209, 88, 0.7); }
     .key-status.active { color: var(--green); }
     .btn-save { background: var(--green); color: #000; border: none; border-radius: 12px; padding: 14px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 20px; font-family: inherit; }
-    #lockBtn { background: rgba(48,209,88,0.2); border: 1px solid rgba(48,209,88,0.4); color: var(--green); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; transition: 0.2s; flex-shrink: 0; }
-    #lockHint { display: none; font-size: 11px; color: var(--orange); margin-bottom: 8px; padding: 6px 10px; background: rgba(255,159,10,0.1); border-radius: 8px; }
+    #lockBtn, #aiLockBtn { background: rgba(48,209,88,0.2); border: 1px solid rgba(48,209,88,0.4); color: var(--green); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; transition: 0.2s; flex-shrink: 0; }
+    #lockHint, #aiLockHint { display: none; font-size: 11px; color: var(--orange); margin-bottom: 8px; padding: 6px 10px; background: rgba(255,159,10,0.1); border-radius: 8px; }
 
     #scannerModal .modal-content { padding: 0; max-width: 900px; overflow: hidden; }
     .scanner-top { position: relative; padding: 24px; background: linear-gradient(135deg, rgba(10,132,255,0.15) 0%, rgba(191,90,242,0.1) 100%); border-bottom: 1px solid var(--border); overflow: hidden; }
@@ -282,10 +282,16 @@
         <input type="text" id="twelveKeyInput4" placeholder="Ключ 4 (резерв)" style="margin-bottom: 6px;">
         <input type="text" id="twelveKeyInput5" placeholder="Ключ 5 (резерв)" style="margin-bottom: 6px;">
         <div class="settings-help">Бесплатно: <a href="https://twelvedata.com/register" target="_blank">twelvedata.com/register</a></div>
-        <label class="settings-label" style="margin-top: 18px;">🧠 AI API (опционально — если 402)</label>
-        <input type="text" id="aiApiUrl" placeholder="https://api.openai.com/v1/chat/completions" style="margin-bottom: 6px;">
-        <input type="text" id="aiApiKey" placeholder="API ключ (OpenAI / Groq / OpenRouter)" style="margin-bottom: 6px;">
-        <div class="settings-help">Пусто = бесплатный Pollinations (может падать 402). Свой ключ = стабильно. Бесплатные: <a href="https://console.groq.com/keys" target="_blank">Groq</a>, <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a>.</div>
+
+        <label class="settings-label" style="display:flex; justify-content:space-between; align-items:center; margin-top: 22px;"><span>AI API</span><button type="button" id="aiLockBtn" onclick="toggleAiKeysLock()">🔓</button></label>
+        <div id="aiLockHint">🔒 Ключи заблокированы. Нажмите замок чтобы разблокировать.</div>
+        <input type="text" id="aiKeyInput1" placeholder="AI Ключ 1" style="margin-bottom: 6px;">
+        <input type="text" id="aiKeyInput2" placeholder="AI Ключ 2 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="aiKeyInput3" placeholder="AI Ключ 3 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="aiKeyInput4" placeholder="AI Ключ 4 (резерв)" style="margin-bottom: 6px;">
+        <input type="text" id="aiKeyInput5" placeholder="AI Ключ 5 (резерв)" style="margin-bottom: 6px;">
+        <div class="settings-help">Вставь свои ключи. Используются по очереди.</div>
+
         <button class="btn-save" onclick="saveSettings()">💾 Сохранить</button>
     </div>
 </div>
@@ -377,11 +383,13 @@ let scannerResults = [];
 let scannerFilter = 'all';
 let tfCache = {};
 let audioCtx = null;
+let currentAiKeyIndex = 0;
 
 function safeGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
 function safeSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
 function safeDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
 function getTwelveKeys() { try { const keys = JSON.parse(safeGet('twelve_api_keys') || '[]'); return keys.filter(k => k && k.trim().length > 5); } catch(e) { return []; } }
+function getAiKeys() { try { const keys = JSON.parse(safeGet('ai_api_keys') || '[]'); return keys.filter(k => k && k.trim().length > 5); } catch(e) { return []; } }
 
 function updateKeyStatus() {
     const keys = getTwelveKeys();
@@ -397,7 +405,7 @@ function updateKeyStatus() {
 
 function isKeysLocked() { return safeGet('keys_locked') === '1'; }
 function toggleKeysLock() {
-    if (isKeysLocked()) { if (confirm('Разблокировать ключи?')) { safeSet('keys_locked', '0'); updateLockUI(); } }
+    if (isKeysLocked()) { if (confirm('Разблокировать Twelve Data ключи?')) { safeSet('keys_locked', '0'); updateLockUI(); } }
     else { safeSet('keys_locked', '1'); updateLockUI(); }
 }
 
@@ -406,7 +414,6 @@ function updateLockUI() {
     const btn = document.getElementById('lockBtn');
     const inputs = document.querySelectorAll('#settingsModal input[id^="twelveKeyInput"]');
     const hint = document.getElementById('lockHint');
-    const saveBtn = document.querySelector('#settingsModal .btn-save');
     inputs.forEach(input => {
         input.readOnly = locked;
         input.style.opacity = locked ? '0.55' : '1';
@@ -415,30 +422,59 @@ function updateLockUI() {
     });
     if (btn) { btn.textContent = locked ? '🔒' : '🔓'; btn.style.background = locked ? 'rgba(255,159,10,0.2)' : 'rgba(48,209,88,0.2)'; }
     if (hint) hint.style.display = locked ? 'block' : 'none';
-    if (saveBtn) { saveBtn.disabled = locked; saveBtn.style.opacity = locked ? '0.5' : '1'; saveBtn.textContent = locked ? '🔒 Ключи заблокированы' : '💾 Сохранить'; }
+}
+
+function isAiKeysLocked() { return safeGet('ai_keys_locked') === '1'; }
+function toggleAiKeysLock() {
+    if (isAiKeysLocked()) { if (confirm('Разблокировать AI ключи?')) { safeSet('ai_keys_locked', '0'); updateAiLockUI(); } }
+    else { safeSet('ai_keys_locked', '1'); updateAiLockUI(); }
+}
+
+function updateAiLockUI() {
+    const locked = isAiKeysLocked();
+    const btn = document.getElementById('aiLockBtn');
+    const inputs = document.querySelectorAll('#settingsModal input[id^="aiKeyInput"]');
+    const hint = document.getElementById('aiLockHint');
+    inputs.forEach(input => {
+        input.readOnly = locked;
+        input.style.opacity = locked ? '0.55' : '1';
+        input.style.cursor = locked ? 'not-allowed' : 'text';
+        input.style.background = locked ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.35)';
+    });
+    if (btn) { btn.textContent = locked ? '🔒' : '🔓'; btn.style.background = locked ? 'rgba(255,159,10,0.2)' : 'rgba(48,209,88,0.2)'; }
+    if (hint) hint.style.display = locked ? 'block' : 'none';
 }
 
 function openSettings() {
     try {
         const keys = getTwelveKeys();
         for (let i = 1; i <= 5; i++) { const el = document.getElementById('twelveKeyInput' + i); if (el) el.value = keys[i-1] || ''; }
+        const aiKeys = getAiKeys();
+        for (let i = 1; i <= 5; i++) { const el = document.getElementById('aiKeyInput' + i); if (el) el.value = aiKeys[i-1] || ''; }
         const aiUrl = document.getElementById('aiApiUrl'); if (aiUrl) aiUrl.value = safeGet('ai_api_url') || '';
-        const aiKey = document.getElementById('aiApiKey'); if (aiKey) aiKey.value = safeGet('ai_api_key') || '';
-        updateKeyStatus(); updateLockUI();
+        updateKeyStatus(); updateLockUI(); updateAiLockUI();
         document.getElementById('settingsModal').classList.add('active');
     } catch(e) { alert('Ошибка: ' + e.message); }
 }
 
 function saveSettings() {
-    if (isKeysLocked()) { alert('🔒 Ключи заблокированы.'); return; }
+    if (isKeysLocked() && isAiKeysLocked()) { alert('🔒 Оба набора ключей заблокированы.'); return; }
     try {
-        const keys = [];
-        for (let i = 1; i <= 5; i++) { const val = document.getElementById('twelveKeyInput' + i).value.trim(); if (val) keys.push(val); }
-        if (keys.length > 0) safeSet('twelve_api_keys', JSON.stringify(keys)); else safeDel('twelve_api_keys');
-        const aiUrlVal = (document.getElementById('aiApiUrl')?.value || '').trim();
-        const aiKeyVal = (document.getElementById('aiApiKey')?.value || '').trim();
-        if (aiUrlVal) safeSet('ai_api_url', aiUrlVal); else safeDel('ai_api_url');
-        if (aiKeyVal) safeSet('ai_api_key', aiKeyVal); else safeDel('ai_api_key');
+        if (!isKeysLocked()) {
+            const keys = [];
+            for (let i = 1; i <= 5; i++) { const val = document.getElementById('twelveKeyInput' + i).value.trim(); if (val) keys.push(val); }
+            if (keys.length > 0) safeSet('twelve_api_keys', JSON.stringify(keys)); else safeDel('twelve_api_keys');
+        }
+        if (!isAiKeysLocked()) {
+            const aiKeys = [];
+            for (let i = 1; i <= 5; i++) { const val = document.getElementById('aiKeyInput' + i).value.trim(); if (val) aiKeys.push(val); }
+            if (aiKeys.length > 0) safeSet('ai_api_keys', JSON.stringify(aiKeys)); else safeDel('ai_api_keys');
+            const aiUrlEl = document.getElementById('aiApiUrl');
+            if (aiUrlEl) {
+                const aiUrlVal = aiUrlEl.value.trim();
+                if (aiUrlVal) safeSet('ai_api_url', aiUrlVal); else safeDel('ai_api_url');
+            }
+        }
         tfCache = {};
         updateKeyStatus(); closeModal('settingsModal'); updateRisk();
         try { changePair(); } catch(e) {}
@@ -539,35 +575,47 @@ function addChatMessage(text, type) {
     container.scrollTop = container.scrollHeight;
 }
 
-async function aiFetch(url, body, timeoutMs) {
+function detectAiEndpoint(key) {
+    if (!key) return null;
+    if (key.startsWith('gsk_')) return 'https://api.groq.com/openai/v1/chat/completions';
+    if (key.startsWith('sk-or-')) return 'https://openrouter.ai/api/v1/chat/completions';
+    if (key.startsWith('sk-ant-')) return null;
+    if (key.startsWith('sk-')) return 'https://api.openai.com/v1/chat/completions';
+    return 'https://api.openai.com/v1/chat/completions';
+}
+
+function parseAiKeyEntry(entry) {
+    if (!entry) return null;
+    if (entry.includes('|')) {
+        const parts = entry.split('|');
+        return { url: parts[0].trim(), key: parts[1] ? parts[1].trim() : '' };
+    }
+    return { url: null, key: entry.trim() };
+}
+
+async function aiFetchChat(url, key, messages, timeoutMs) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: controller.signal });
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+            body: JSON.stringify({ model: 'gpt-4o-mini', messages: messages, temperature: 0.65, max_tokens: 800 }),
+            signal: controller.signal
+        });
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        if (!text || text.length < 2) throw new Error('Пустой ответ');
-        return text;
+        const data = await res.json();
+        const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!content || content.trim().length < 2) throw new Error('Пустой ответ');
+        return content.trim();
     } finally { clearTimeout(timer); }
-}
-
-function parseAIResponse(text) {
-    if (!text) return null;
-    text = text.trim();
-    if (text.startsWith('{') || text.startsWith('[')) {
-        try {
-            const data = JSON.parse(text);
-            if (data && data.error) throw new Error('API: ' + (data.error.message || JSON.stringify(data.error)));
-            if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) return data.choices[0].message.content;
-            if (typeof data === 'string') return data;
-        } catch(e) { if (e.message.indexOf('API:') === 0) throw e; }
-    }
-    if (text.startsWith('<')) throw new Error('Получен HTML вместо ответа');
-    return text;
-}
-
-async function askAI() {
+}async function askAI() {
     if (isAiTyping) return;
+    const aiKeys = getAiKeys();
+    if (aiKeys.length === 0) {
+        addChatMessage('⚠️ AI ключи не установлены.\n\nОткрой ⚙️ Настройки → раздел «AI API» → вставь до 5 своих ключей → Сохранить.', 'ai');
+        return;
+    }
     isAiTyping = true;
     const container = document.getElementById('chatMessages');
     const typingMsg = document.createElement('div');
@@ -587,39 +635,24 @@ async function askAI() {
         if (lastAnalysisContext) sysPrompt += '\n\n🔍 ПОСЛЕДНИЙ АНАЛИЗ:\n' + lastAnalysisContext;
         else sysPrompt += '\n\n⚠️ Анализа ещё не было. Если спросят про сигнал — предложи нажать "⚡ ЗАПУСТИТЬ ИИ".';
         const messages = [{ role: 'system', content: sysPrompt }].concat(chatHistory);
-        let reply = null; let lastError = 'Все AI-сервисы недоступны';
+        const customUrl = safeGet('ai_api_url') || null;
 
-        const customUrl = safeGet('ai_api_url');
-        const customKey = safeGet('ai_api_key');
-        if (customUrl && customKey) {
+        let reply = null;
+        let lastError = 'Все AI ключи исчерпаны';
+        for (let i = 0; i < aiKeys.length; i++) {
+            const idx = (currentAiKeyIndex + i) % aiKeys.length;
+            const entry = parseAiKeyEntry(aiKeys[idx]);
+            if (!entry || !entry.key) continue;
+            const url = entry.url || customUrl || detectAiEndpoint(entry.key);
+            if (!url) { lastError = 'Не удалось определить endpoint для ключа'; continue; }
             try {
-                const res = await fetch(customUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + customKey },
-                    body: JSON.stringify({ model: 'gpt-4o-mini', messages: messages, temperature: 0.65, max_tokens: 800 })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const c = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-                    if (c && c.trim().length > 2) reply = c.trim();
-                } else { lastError = 'Custom API: HTTP ' + res.status; }
-            } catch(e) { lastError = 'Custom: ' + e.message; }
-        }
-
-        if (!reply) {
-            const variants = [
-                { model: 'openai', label: 'OpenAI' },
-                { model: 'openai-fast', label: 'OpenAI-Fast' },
-                { model: 'mistral', label: 'Mistral' }
-            ];
-            for (const v of variants) {
-                try {
-                    const body = { model: v.model, messages: messages, temperature: 0.65, max_tokens: 800 };
-                    const text = await aiFetch('https://text.pollinations.ai/openai', body, 20000);
-                    const parsed = parseAIResponse(text);
-                    if (parsed && parsed.trim().length > 2) { reply = parsed.trim(); break; }
-                } catch(e) { lastError = v.label + ': ' + e.message; }
-            }
+                const res = await aiFetchChat(url, entry.key, messages, 25000);
+                if (res && res.length > 2) {
+                    reply = res;
+                    currentAiKeyIndex = idx;
+                    break;
+                }
+            } catch(e) { lastError = 'Ключ #' + (idx + 1) + ': ' + e.message; }
         }
 
         const typingEl = document.getElementById('aiTyping');
@@ -629,7 +662,7 @@ async function askAI() {
             if (chatHistory.length > 30) chatHistory = chatHistory.slice(-30);
             addChatMessage(reply, 'ai');
         } else {
-            addChatMessage('⚠️ Все AI-сервисы вернули ошибку.\nПричина: ' + lastError + '\n\n💡 Открой ⚙️ Настройки → поле "AI API" и вставь свой бесплатный ключ (например, с groq.com — 1 минута регистрации, работает стабильно).', 'ai');
+            addChatMessage('⚠️ Не удалось получить ответ.\nПричина: ' + lastError + '\n\n💡 Проверь ключи в ⚙️ Настройки → «AI API».', 'ai');
         }
     } catch (fatalError) {
         const typingEl = document.getElementById('aiTyping'); if (typingEl) typingEl.remove();
